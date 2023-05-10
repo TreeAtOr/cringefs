@@ -1,8 +1,8 @@
 #include "cringefs.h"
 
 int cfs_f_descriptor = -1;
-cfs_super_block sb;
-cfs_file_table ft;
+cfs_super_block_ptr sb;
+cfs_file_table_ptr ft;
 
 
 int main(int argc, char* argv[]){
@@ -90,6 +90,21 @@ int exec_command(cfs_command_ptr command){
     }
 }
 
+
+cfs_meta_ptr find_meta_by_name(char* path)
+{
+    // if file at path not found, return nullptr
+    // else return meta_ptr
+}
+
+int* block_idx_to_disc_ptr(int idx)
+{
+    // if invalid return nullptr
+
+    int result = 0;
+    result = idx * CFS_ONE_BLOCK_SIZE; // + sizeof(cfs_super_block) ?
+}
+
 int open_file(char* path){
 
 
@@ -98,14 +113,23 @@ int open_file(char* path){
         return 0;
     }
     
-    int* file_disc_ptr = find_file_disk(path);
+    cfs_meta_ptr meta_ptr = find_meta_by_name(path);
 
-    if (file_disc_ptr == nullptr) // not found on disc
+    if (meta_ptr == nullptr) // not found on disc
     {
         return -1;
     }
     else
     {
+
+        int* to_disc_ptr = block_idx_to_disc_ptr(meta_ptr->start_block_idx);
+
+        if (to_disc_ptr == nullptr)
+        {
+            return -1; // error
+        }
+
+        int file_size = meta_ptr->size;
 
 
     }

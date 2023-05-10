@@ -8,9 +8,11 @@
 #define CFS_MAGIC 0x69A4
 
 #define CFS_FILE_PATH_LEN 256
+#define CFS_ONE_BLOCK_SIZE 2048 // random
 
 typedef struct cfs_super_block_t{
     int sb_magic;
+
     /* data */
 
 } cfs_super_block, *cfs_super_block_ptr;
@@ -18,11 +20,11 @@ typedef struct cfs_super_block_t{
 typedef struct cfs_meta_t{
 
     char f_path[CFS_FILE_PATH_LEN];
-    int* start_block_ptr; 
+    int start_block_idx;
+    //int* start_block_ptr; 
     int size; // in bytes
 
     // char is_dir = 0/1
-    /* data ??? */
 
 } cfs_meta, *cfs_meta_ptr;
 
@@ -35,19 +37,18 @@ typedef struct cfs_block_t {
 
 typedef struct сfs_file_t {
     cfs_meta_ptr meta_ptr;
+    char* content;
 
-    // ptr to meta
-    // ptr to blocks
 
 } сfs_file, * сfs_file_ptr;
 
 
 
 typedef struct cfs_file_table_t{
-    // array/list of loaded files
 
-    // amount?
-    /* data */
+    int table_size; // количество в таблице
+    cfs_file_ptr* table; // сама таблица, массив указателей 
+    // убрать * !??
 
 } cfs_file_table;
 
