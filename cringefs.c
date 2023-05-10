@@ -54,7 +54,7 @@ void parse_args(){
     //{
         // read str, parse_str(char* str, ...);
         // if bad str, message
-        // if good, exec_command() (use switch and cfs_command_types)
+        // if good, exec_command() (use switch and cfs_command_type)
         // if exit return
     //}
     
@@ -145,9 +145,9 @@ int move_file(char* path, char* dst_path){
 }
 
 int delete_file(char* path){
-    //find file in table
+    // find file in table
     // unload()
-    //find file on disk
+    // find file on disk
     // set meta cleared
 }
 
@@ -170,7 +170,7 @@ int remove_from_table(char* path){
 }
 
 int clear_table(){
-    //clear all
+    // clear all
 }
 
 //return ptr if found file else -1

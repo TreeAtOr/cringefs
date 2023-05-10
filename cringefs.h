@@ -16,6 +16,7 @@ typedef struct cfs_super_block_t{
 } cfs_super_block, *cfs_super_block_ptr;
 
 typedef struct cfs_meta_t{
+
     char f_path[CFS_FILE_PATH_LEN];
 
     // char is_dir = 0/1
@@ -45,7 +46,7 @@ typedef struct cfs_block_t{
     // ptr to block?
 } cfs_block;
 
-typedef enum cfs_command_types_t{
+typedef enum cfs_command_type_t{
     OPEN,     // open  /text.txt
     CLOSE,    // close /text.txt
     SHOW,     // cat   /text.txt
