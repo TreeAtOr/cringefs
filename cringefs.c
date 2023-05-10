@@ -1,8 +1,8 @@
 #include "cringefs.h"
 
-int cringefs_f_descriptor = -1;
-struct cringefs_super_block sb;
-struct cringefs_file_table ft;
+int cfs_f_descriptor = -1;
+cfs_super_block sb;
+cfs_file_table ft;
 
 
 int main(int argc, char* argv[]){
@@ -28,21 +28,21 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-int startup(char* device_path, struct cringefs_super_block* sb){
-    // cringefs_f_descriptor = open(device_path)  // гуглите функцию open()
+int startup(char* device_path, cfs_super_block_ptr sb){
+    // cfs_f_descriptor = open(device_path)  // гуглите функцию open()
     // read sb
     check_sb(sb);
     // if something bad return -1
 }
 
 int shutdown(){
-    // close(cringefs_f_descriptor) ??? 
+    // close(cfs_f_descriptor) ??? 
     // if something bad return -1
 }
 
-int check_sb(struct cringefs_super_block* sb){
+int check_sb(cfs_super_block_ptr sb){
     // check magic
-    // if != CRINGEFS_MAGIC return -1
+    // if != CFS_MAGIC return -1
 }
 
 
@@ -54,20 +54,20 @@ void parse_args(){
     //{
         // read str, parse_str(char* str, ...);
         // if bad str, message
-        // if good, exec_command() (use switch and cringefs_command_types)
+        // if good, exec_command() (use switch and cfs_command_types)
         // if exit return
     //}
     
 }
 
 // parse str, put command in dst_command. If something goes wrong return -1
-int parse_str(char * str, struct cringefs_command* dst_command){
+int parse_str(char * str, cfs_command_ptr dst_command){
     // check str if it is command and it has correct arguments
     //fill dst_command struct
     
 }
 
-int exec_command(struct cringefs_command* command){
+int exec_command(cfs_command_ptr command){
 
     switch (command->command_type)
     {
@@ -174,7 +174,7 @@ int clear_table(){
 }
 
 //return ptr if found file else -1
-struct cringefs_file* find_file_table(char* path){
+cfs_file_ptr find_file_table(char* path){
     // find in table
 }
 
