@@ -2,6 +2,8 @@
 
 #include "stdio.h"
 #include "string.h"
+#include "stdlib.h" // calloc
+#include <unistd.h> // read
 
 #define CFS_STARTPOS 0xffff // for formating system
 
@@ -98,7 +100,7 @@ int exec_command(cfs_command_ptr command);
 
 
 
-int open_file(char* path); // load to table
+int cfs_fopen(char* path); // load to table
 
 int close_file(char* path); // unload from table
 

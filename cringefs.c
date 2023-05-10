@@ -105,7 +105,7 @@ int* block_idx_to_disc_ptr(int idx)
     result = idx * CFS_ONE_BLOCK_SIZE; // + sizeof(cfs_super_block) ?
 }
 
-int open_file(char* path){
+int cfs_fopen(char* path){
 
 
     if (find_file_table(path) != nullptr) // already opened
@@ -121,7 +121,7 @@ int open_file(char* path){
     }
     else
     {
-
+/*
         int* to_disc_ptr = block_idx_to_disc_ptr(meta_ptr->start_block_idx);
 
         if (to_disc_ptr == nullptr)
@@ -131,7 +131,14 @@ int open_file(char* path){
 
         int file_size = meta_ptr->size;
 
+        char* buf = calloc(file_size, sizeof(char));
+        if (buf == nullptr)
+        {
+            return -1; // error
+        }
 
+        read(to_disc_ptr, buf, )
+*/
     }
 
     // if file already in table return 0
@@ -198,6 +205,7 @@ int delete_file(char* path){
 int sort_meta(){
     // hardcore
 }
+
 int pack_fs(){
     // hardcore
 }
@@ -207,6 +215,7 @@ int format_fs(){
     // reset superblock
     // write sb
 }
+
 
 int remove_from_table(char* path){
     // find and clear
