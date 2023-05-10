@@ -18,13 +18,30 @@ typedef struct cfs_super_block_t{
 typedef struct cfs_meta_t{
 
     char f_path[CFS_FILE_PATH_LEN];
+    int* start_block_ptr; 
+    int size; // in bytes
 
     // char is_dir = 0/1
-    // ptr to start block
-    // amount blocks
-    /* data */
+    /* data ??? */
 
-} cfs_meta;
+} cfs_meta, *cfs_meta_ptr;
+
+// need?
+typedef struct cfs_block_t {
+    // ptr to block?
+} cfs_block;
+
+
+
+typedef struct ñfs_file_t {
+    cfs_meta_ptr meta_ptr;
+
+    // ptr to meta
+    // ptr to blocks
+
+} ñfs_file, * ñfs_file_ptr;
+
+
 
 typedef struct cfs_file_table_t{
     // array/list of loaded files
@@ -35,16 +52,7 @@ typedef struct cfs_file_table_t{
 } cfs_file_table;
 
 
-typedef struct ñfs_file_t {
-    // ptr to meta
-    // ptr to blocks
 
-} ñfs_file, *ñfs_file_ptr;
-
-// need?
-typedef struct cfs_block_t{
-    // ptr to block?
-} cfs_block;
 
 typedef enum cfs_command_type_t{
     OPEN,     // open  /text.txt
@@ -107,7 +115,7 @@ int move_file(char* path, char* dst_path); // move file from path to dst_path
 
 int delete_file(char* path); // delete from disk
 
-struct cfs_file* find_file_table(char* path); // returns ptr to file
+cfs_file_ptr find_file_table(char* path); // returns ptr to file
 
 int* find_file_disk(char* path); // returns ptr to file on disk
 

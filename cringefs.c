@@ -91,6 +91,25 @@ int exec_command(cfs_command_ptr command){
 }
 
 int open_file(char* path){
+
+
+    if (find_file_table(path) != nullptr) // already opened
+    {
+        return 0;
+    }
+    
+    int* file_disc_ptr = find_file_disk(path);
+
+    if (file_disc_ptr == nullptr) // not found on disc
+    {
+        return -1;
+    }
+    else
+    {
+
+
+    }
+
     // if file already in table return 0
     // read file paths from disk until you find path
     // if path not found return -1
@@ -173,12 +192,12 @@ int clear_table(){
     // clear all
 }
 
-//return ptr if found file else -1
+//return ptr if found file else nullptr
 cfs_file_ptr find_file_table(char* path){
     // find in table
 }
 
-// return ptr if found file else -1
+// return ptr if found file else nullptr
 int* find_file_disk(char* path){
     // find on disk
 }
