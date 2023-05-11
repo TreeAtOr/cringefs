@@ -2,14 +2,17 @@
 
 int cfs_f_descriptor = -1;
 cfs_super_block_ptr sb;
-cfs_file_table_ptr ft;
+cfs_file_table ft;
 
 
 int main(int argc, char* argv[]){
     // argv[1] это путь к файлу устройства(флешки) ( например "/dev/sda3" )
 
+    printf("Debug: program starts\n");
+
     if (argc <= 1){
         //print argument with device path missed
+        printf("Debug: program ends\n");
         return -1;
     }
     // startup(argv[1])
@@ -24,7 +27,7 @@ int main(int argc, char* argv[]){
 
     // поймать сигнал ctrl+c? дла корректного shutdown
     // shutdown()
-
+    printf("Debug: program ends\n");
     return 0;
 }
 
@@ -72,7 +75,7 @@ int exec_command(cfs_command_ptr command){
     switch (command->command_type)
     {
     case OPEN:
-        open_file(command->arg1);
+        cfs_fopen(command->arg1);
         break;
     case CLOSE:
         close_file(command->arg1);

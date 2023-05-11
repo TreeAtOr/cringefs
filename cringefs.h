@@ -12,6 +12,11 @@
 #define CFS_FILE_PATH_LEN 256
 #define CFS_ONE_BLOCK_SIZE 2048 // random
 
+
+#ifdef __linux__
+#define nullptr 0
+#endif
+
 typedef struct cfs_super_block_t{
     int sb_magic;
 
@@ -37,20 +42,20 @@ typedef struct cfs_block_t {
 
 
 
-typedef struct сfs_file_t {
+typedef struct cfs_file_t {
     cfs_meta_ptr meta_ptr;
     char* content;
 
 
-} сfs_file, * сfs_file_ptr;
+} cfs_file, * cfs_file_ptr;
 
 
 
 typedef struct cfs_file_table_t{
 
-    int table_size; // количество в таблице
-    cfs_file_ptr* table; // сама таблица, массив указателей 
-    // убрать * !??
+    int table_size; // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    cfs_file_ptr* table; // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
+    // пїЅпїЅпїЅпїЅпїЅпїЅ * !??
 
 } cfs_file_table;
 
@@ -133,7 +138,7 @@ int format_fs();
 
 
 
-int add_to_table(сfs_file_ptr file);
+int add_to_table(cfs_file_ptr file);
 
 int remove_from_table(char* path);
 
