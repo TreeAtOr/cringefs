@@ -5,13 +5,16 @@
 #include "string.h"
 #include "stdlib.h" // calloc
 #include <unistd.h> // read
+#include "fcntl.h"
 
 #define CFS_STARTPOS 0xffff // for formating system
+#define CFS_ENDPOS 0x5ffff
 
 #define CFS_MAGIC 0x69A4
 
 #define CFS_FILE_PATH_LEN 256
 #define CFS_ONE_BLOCK_SIZE 4096
+#define CFS_SUPERBLOCK_SIZE CFS_ONE_BLOCK_SIZE
 #define CFS_ONE_META_SIZE 512
 
 #ifdef __linux__
@@ -20,9 +23,10 @@
 
 typedef struct cfs_super_block_t{
     int sb_magic;
-
-    /* data */
-
+    int* start_block_ptr;
+    int* free_space_ptr;
+    int* end_meta_ptr;
+    int* start_meta_ptr;
 } cfs_super_block, *cfs_super_block_ptr;
 
 typedef struct cfs_meta_t{
@@ -168,3 +172,7 @@ int* meta_idx_to_disc_ptr(int idx);
 
 // get free block from end of blocks in fs, return index
 int get_new_free_block_idx();
+
+
+
+int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst);

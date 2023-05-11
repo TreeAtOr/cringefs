@@ -1,6 +1,6 @@
 #include "cringefs.h"
 
-int cfs_f_descriptor = -1;
+int* cfs_f_descriptor = -1;
 cfs_super_block_ptr sb;
 cfs_file_table ft;
 
@@ -264,12 +264,13 @@ int copy_file(char* path, char* dst_path){
     dst_f_ptr->content = malloc(file_table_ptr->meta_ptr->size);
     strcpy(dst_f_ptr->content, file_table_ptr->content);
     // copy data to meta
-    strcpy(dst_f_ptr->meta_ptr->f_path, file_table_ptr->meta_ptr->f_path);
-    dst_f_ptr->meta_ptr->size = file_table_ptr->meta_ptr->size;
-    dst_f_ptr->meta_ptr->start_block_idx = file_table_ptr->meta_ptr->start_block_idx;
-    dst_f_ptr->meta_ptr->is_dir = file_table_ptr->meta_ptr->is_dir;
-    dst_f_ptr->meta_ptr->cleared = file_table_ptr->meta_ptr->cleared;
+    int new_start_block_idx = dst_f_ptr->meta_ptr->start_block_idx; // save to not lose
 
+    copy_meta(file_table_ptr->meta_ptr, dst_f_ptr->meta_ptr);
+
+    dst_f_ptr->meta_ptr->start_block_idx = new_start_block_idx; // recover new adress
+
+    // save new file
     save_file(dst_f_ptr->meta_ptr->f_path);
 
     return 0;
@@ -377,9 +378,19 @@ int pack_fs(){
 }
 
 int format_fs(){
-    // clear table
+    // clear table of opened files
+    clear_table();
+
     // reset superblock
+    sb->start_block_ptr = CFS_STARTPOS + CFS_SUPERBLOCK_SIZE;
+    sb->free_space_ptr = sb->start_block_ptr;
+
+    sb->start_meta_ptr = CFS_ENDPOS - CFS_ONE_META_SIZE;
+    sb->end_meta_ptr = sb->start_meta_ptr;
+    
     // write sb
+    lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET); // shift file pointer
+    write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
 }
 
 
@@ -403,8 +414,25 @@ int* find_file_disk(char* path){
 
 
 int get_new_free_block_idx(){
-    // new_block_idx = superblock.last_idx_block
-    // ckeck if new block does not overlap with meta
-    // if overlaps return 0
-    // if not increase superblock.last_idx_block, return new_block_idx
+
+    int new_block_idx = disk_ptr_to_block_idx(sb->free_space_ptr);
+
+    // ckeck if new block overlaps meta
+    if (sb->free_space_ptr + CFS_ONE_BLOCK_SIZE > sb->end_meta_ptr){
+        printf("New block with index %i overlaps meta\n", new_block_idx);
+        return -1;
+    }
+
+    // everything is ok
+    sb->free_space_ptr += CFS_ONE_BLOCK_SIZE;
+    return new_block_idx;
+
+}
+
+int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst){
+    strcpy(dst->f_path, src->f_path);
+    dst->start_block_idx = src->start_block_idx;
+    dst->is_dir = src->is_dir;
+    dst->cleared = src->cleared;
+    dst->size = src->size;
 }
