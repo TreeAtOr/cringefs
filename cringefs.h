@@ -10,7 +10,7 @@
 #define CFS_MAGIC 0x69A4
 
 #define CFS_FILE_PATH_LEN 256
-#define CFS_ONE_BLOCK_SIZE 2048 // random
+#define CFS_ONE_BLOCK_SIZE 4096 // random
 
 
 #ifdef __linux__
