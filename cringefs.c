@@ -130,12 +130,35 @@ int* block_idx_to_disc_ptr(int idx)
 {
     // if invalid return nullptr
 
+    if (idx <= 0){
+        printf("Block idx %i - wrong value\n", idx);
+        return nullptr;
+    }
+
     int result = 0;
-    result = idx * CFS_ONE_BLOCK_SIZE; // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
+    result = idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS; // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
+
+    // check border ptrs
+    if (result < sb->start_block_ptr - CFS_SUPERBLOCK_SIZE || result > sb->start_meta_ptr + CFS_ONE_META_SIZE){
+        printf("Converted block idx %i -> %i out of borders\n", idx, result);
+        return nullptr;
+    }
+
+    return result;
 }
 
 int disk_ptr_to_block_idx(int* ptr){
-    printf("TODO convertion from disk ptr to block idx");
+    //printf("TODO convertion from disk ptr to block idx");
+
+    //int* idx = ((char*)ptr - CFS_STARTPOS - CFS_SUPERBLOCK_SIZE) / CFS_ONE_BLOCK_SIZE; // char* для того, чтобы смещение прибавлялось по байтам
+}
+
+int disk_ptr_to_meta_idx(int* ptr){
+
+}
+
+int* meta_idx_to_disc_ptr(int idx){
+
 }
 
 int cfs_fopen(char* path){
@@ -385,12 +408,13 @@ int format_fs(){
     sb->start_block_ptr = CFS_STARTPOS + CFS_SUPERBLOCK_SIZE;
     sb->free_space_ptr = sb->start_block_ptr;
 
-    sb->start_meta_ptr = CFS_ENDPOS - CFS_ONE_META_SIZE;
+    sb->start_meta_ptr = CFS_ENDPOS;
     sb->end_meta_ptr = sb->start_meta_ptr;
     
     // write sb
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET); // shift file pointer
-    write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
+    write(cfs_f_descriptor, &sb, sizeof(cfs_super_block)); // write
+    //write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
 }
 
 
