@@ -183,8 +183,8 @@ int cfs_fopen(char* path){
 
 int close_file(char* path){
     // read table until you find file with path
-    // if file has been modified save it
-    // clear it
+    // save it
+    // delete it from table
 }
 
 int show_file(char* path){
@@ -267,6 +267,8 @@ int copy_file(char* path, char* dst_path){
     strcpy(dst_f_ptr->meta_ptr->f_path, file_table_ptr->meta_ptr->f_path);
     dst_f_ptr->meta_ptr->size = file_table_ptr->meta_ptr->size;
     dst_f_ptr->meta_ptr->start_block_idx = file_table_ptr->meta_ptr->start_block_idx;
+    dst_f_ptr->meta_ptr->is_dir = file_table_ptr->meta_ptr->is_dir;
+    dst_f_ptr->meta_ptr->cleared = file_table_ptr->meta_ptr->cleared;
 
     save_file(dst_f_ptr->meta_ptr->f_path);
 
@@ -283,10 +285,30 @@ int move_file(char* path, char* dst_path){
 }
 
 int delete_file(char* path){
-    // find file in table
-    // unload()
-    // find file on disk
-    // set meta cleared
+
+    // find in table
+    cfs_file_ptr file_table_ptr = find_file_table(path);
+
+    // if not found open
+    if (file_table_ptr == nullptr)
+        cfs_fopen(path);
+
+    // search once again
+    file_table_ptr = find_file_table(path);
+
+    // still not found - no such file. No file - no problems
+    if (file_table_ptr == nullptr){
+        printf("No file %s found\n", path);
+        return -1;
+    }    
+
+    // if found set file cleared
+    file_table_ptr->meta_ptr->cleared = 1;
+    // close file(with save)
+    close_file(path);
+
+    return 0;
+
 }
 
 int create_file(char* path){

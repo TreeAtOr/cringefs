@@ -31,8 +31,8 @@ typedef struct cfs_meta_t{
     int start_block_idx;
     //int* start_block_ptr; 
     int size; // in bytes
-
-    // char is_dir = 0/1
+    char is_dir;
+    char cleared;
 
 } cfs_meta, *cfs_meta_ptr;
 
