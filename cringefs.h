@@ -127,6 +127,7 @@ int move_file(char* path, char* dst_path); // move file from path to dst_path
 
 int delete_file(char* path); // delete from disk
 
+// creates only on disk
 int create_file(char* path); // create on disk
 
 cfs_file_ptr find_file_table(char* path); // returns ptr to file
