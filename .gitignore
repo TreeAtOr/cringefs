@@ -1,4 +1,5 @@
 .vscode
+.vs
 cringefs
 main
 print_super_block

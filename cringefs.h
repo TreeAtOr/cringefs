@@ -1,5 +1,6 @@
 // change git test
 
+#include "assert.h"
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h" // calloc
@@ -10,8 +11,8 @@
 #define CFS_MAGIC 0x69A4
 
 #define CFS_FILE_PATH_LEN 256
-#define CFS_ONE_BLOCK_SIZE 4096 // random
-
+#define CFS_ONE_BLOCK_SIZE 4096
+#define CFS_ONE_META_SIZE 512
 
 #ifdef __linux__
 #define nullptr 0
@@ -72,8 +73,8 @@ typedef enum cfs_command_type_t{
     MOVE,     // mv    /text.txt /dir/text.txt
     CREATEDIR,// mkdir /dir
     FORMAT,   // format
-    EXTEND,   // need command or it is inner function?
-    SHRINK,   // need_command or it is inner function?
+    EXTEND,   // command is needed or it is inner function?
+    SHRINK,   // command is needed or it is inner function?
     EXIT      // exit
     // etc.
 } cfs_command_type;
@@ -111,7 +112,10 @@ int close_file(char* path); // unload from table
 
 int show_file(char* path); // show on screen
 
-int write_file(char* path); // save to disk
+// use during creation of new file to save it on disk
+int write_file(cfs_file_ptr file_ptr); // save to disk // not needed 11.05.23 15:36 thinking
+
+int save_file(char* path); // save file from table to disk (if needed)
 
 int extend_file(char* path); // move? file and add free blocks
 
@@ -123,6 +127,8 @@ int move_file(char* path, char* dst_path); // move file from path to dst_path
 
 int delete_file(char* path); // delete from disk
 
+int create_file(char* path); // create on disk
+
 cfs_file_ptr find_file_table(char* path); // returns ptr to file
 
 int* find_file_disk(char* path); // returns ptr to file on disk
@@ -132,6 +138,11 @@ int* find_file_disk(char* path); // returns ptr to file on disk
 int sort_meta();
 
 int pack_fs();
+
+// return index of first block
+// requesting <minimum_blocks_num> blocks
+// if not found return nullptr
+int find_empty_space_in_meta(int minimum_blocks_num);
 
 int format_fs();
 
@@ -144,5 +155,15 @@ int remove_from_table(char* path);
 
 int clear_table();
 
-//read_block ?
-// write block ? 
+
+
+int disk_ptr_to_block_idx(int* ptr);
+
+int* block_idx_to_disc_ptr(int idx);
+
+int disk_ptr_to_meta_idx(int* ptr);
+
+int* meta_idx_to_disc_ptr(int idx);
+
+// get free block from end of blocks in fs, return index
+int get_new_free_block_idx();
