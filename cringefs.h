@@ -22,7 +22,7 @@
 #endif
 
 typedef struct cfs_super_block_t{
-    int sb_magic;
+    int* sb_magic;
     int* start_block_ptr;
     int* free_space_ptr;
     int* end_meta_ptr;
@@ -94,11 +94,11 @@ typedef struct cfs_command_t{
 
 
 
-int startup(char* device_path, cfs_super_block_ptr sb);
+int startup(char* device_path);
 
 int shutdown();
 
-int check_sb(cfs_super_block_ptr sb);
+int check_sb(cfs_super_block sb);
 
 
 

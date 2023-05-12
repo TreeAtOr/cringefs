@@ -1,7 +1,14 @@
 #include "cringefs.h"
 
+/*
+/////////////////////////////////////READ THIS PLEASE///////////////////////////////////////
+/////////////I HAD TO CHANGE SB TYPE FROM CFS_SUPER_BLOCK_PTR TO CFS_SUPER_BLOCK////////////
+///////////////////////////////OTHERWISE READING ISN'T WORKING//////////////////////////////
+/////////////////////////////////IT SAYS "SEGMENTATION FAULT"///////////////////////////////
+*/
+
 int* cfs_f_descriptor = -1;
-cfs_super_block_ptr sb;
+cfs_super_block sb;
 cfs_file_table ft;
 
 
@@ -17,43 +24,86 @@ int main(int argc, char* argv[]){
 
     if (argc <= 1){
         //print argument with device path missed
+        printf("There's no such argument\n");
         printf("Debug: program ends\n");
         return -1;
     }
-    // startup(argv[1])
 
-    //if(check_sb() == -1){
-    // print super block corrupted / no fs on device
-    // ask to continue
-    //}
-
+    if (startup(argv[1]) == -1)
+        printf("Debug: No startup\n");
     
+    else
+    {
+        // some shit
+        // поймать сигнал ctrl+c? дла корректного shutdown
+        shutdown();
+    }
     // parse_args()
 
-    // поймать сигнал ctrl+c? дла корректного shutdown
-    // shutdown()
     printf("Debug: program ends\n");
     return 0;
 }
 
-int startup(char* device_path, cfs_super_block_ptr sb){
-    // cfs_f_descriptor = open(device_path)  // гуглите функцию open()
-    // read sb
-    check_sb(sb);
+int startup(char* device_path){
+    cfs_f_descriptor = open(device_path, O_RDWR);
+    printf("Debug: in startup\n");
+    if (cfs_f_descriptor == -1){
+        perror("Error");
+        return -1;
+    }
+    //start reading superblock
+    read(cfs_f_descriptor, &(sb.sb_magic), (size_t)sizeof(int*));
+    read(cfs_f_descriptor, &(sb.start_block_ptr), (size_t)sizeof(int*));
+    read(cfs_f_descriptor, &(sb.free_space_ptr), (size_t)sizeof(int*));
+    read(cfs_f_descriptor, &(sb.end_meta_ptr), (size_t)sizeof(int*));
+    read(cfs_f_descriptor, &(sb.start_meta_ptr), (size_t)sizeof(int*));
+
+    if (check_sb(sb) == -1)
+    {
+        while(1){
+            printf("Superblock of file %s isn't %p, do you want to formate file system? (y/n) ", device_path, CFS_MAGIC);
+            char* choice[2] = { NULL };
+            scanf("%s", &choice);
+            if (choice[0] == 'y' || choice[0] == 'Y')
+            {
+                format_fs();
+                // if(format_fs == -1)
+                //      return -1;
+                break;
+            }
+            else if (choice[0] == 'n' || choice[0] == 'N')
+            {
+                printf("Well, goodbye\n");
+                return -1;
+            }
+            else 
+            {
+                printf("Looks like it's wrong input, my friend :( \n");
+            }
+        }
+    }
+    else printf("Everything is OK\n");
+
     // if something bad return -1
 }
 
 int shutdown(){
-    // close(cfs_f_descriptor) ??? 
+    if (close(cfs_f_descriptor)){
+        printf("Oh no, something very bad happened :(\n");
+        return -1;
+    }
+    return 0;
     // if something bad return -1
 }
 
-int check_sb(cfs_super_block_ptr sb){
+int check_sb(cfs_super_block sb){
     // check magic
-    // if != CFS_MAGIC return -1
+    if (sb.sb_magic != CFS_MAGIC)
+        return -1;
+    else return 0;
 }
 
-
+/*
 
 
 void parse_args(){
@@ -161,6 +211,8 @@ int* meta_idx_to_disc_ptr(int idx){
 
 }
 
+
+
 int cfs_fopen(char* path){
 
 
@@ -194,7 +246,7 @@ int cfs_fopen(char* path){
         }
 
         read(to_disc_ptr, buf, )
-*/
+
     }
 
     // if file already in table return 0
@@ -203,6 +255,7 @@ int cfs_fopen(char* path){
     // read file, add file to table
     
 }
+*/
 
 int close_file(char* path){
     // read table until you find file with path
@@ -241,6 +294,7 @@ int shrink_file(char* path){
     // think
 }
 
+/*
 int copy_file(char* path, char* dst_path){
 
     // find file by path in table/disk
@@ -399,23 +453,29 @@ int find_empty_space_in_meta(int minimum_blocks_num){
 int pack_fs(){
     // hardcore
 }
-
+*/
 int format_fs(){
     // clear table of opened files
     clear_table();
+    printf("in format\n");
 
     // reset superblock
-    sb->start_block_ptr = CFS_STARTPOS + CFS_SUPERBLOCK_SIZE;
-    sb->free_space_ptr = sb->start_block_ptr;
+    sb.sb_magic = CFS_MAGIC;
+    sb.start_block_ptr = CFS_STARTPOS + CFS_SUPERBLOCK_SIZE;
+    sb.free_space_ptr = sb.start_block_ptr;
 
-    sb->start_meta_ptr = CFS_ENDPOS;
-    sb->end_meta_ptr = sb->start_meta_ptr;
+    sb.start_meta_ptr = CFS_ENDPOS;
+    sb.end_meta_ptr = sb.start_meta_ptr;
+
     
+    printf("%p, %p, %p, %p, %p\n",sb.sb_magic, sb.start_block_ptr, sb.free_space_ptr, sb.end_meta_ptr, sb.start_meta_ptr);
+
     // write sb
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET); // shift file pointer
     write(cfs_f_descriptor, &sb, sizeof(cfs_super_block)); // write
     //write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
 }
+
 
 
 int remove_from_table(char* path){
@@ -425,7 +485,7 @@ int remove_from_table(char* path){
 int clear_table(){
     // clear all
 }
-
+/*
 //return ptr if found file else nullptr
 cfs_file_ptr find_file_table(char* path){
     // find in table
@@ -460,3 +520,4 @@ int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst){
     dst->cleared = src->cleared;
     dst->size = src->size;
 }
+*/
