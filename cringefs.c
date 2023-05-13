@@ -11,6 +11,7 @@ int main(int argc, char* argv[]){
     assert(sizeof(cfs_meta) <= CFS_ONE_META_SIZE);
 
 
+
     // argv[1] это путь к файлу устройства(флешки) ( например "/dev/sda3" )
 
     printf("Debug: program starts\n");
@@ -28,6 +29,7 @@ int main(int argc, char* argv[]){
     else
     {
         // some shit
+        //printf("calc %p need %i\n", block_idx_to_disc_ptr(1), CFS_STARTPOS + CFS_SUPERBLOCK_SIZE);
         printf("Enter command:\n");
         parse_args();
         // like parser
@@ -40,6 +42,7 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
+
 int startup(char* device_path){
     cfs_f_descriptor = open(device_path, O_RDWR);
     printf("Debug: in startup\n");
@@ -49,11 +52,14 @@ int startup(char* device_path){
     }
     //start reading superblock
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET);
-    read(cfs_f_descriptor, &(sb.sb_magic), (size_t)sizeof(int));
-    read(cfs_f_descriptor, &(sb.start_block_ptr), (size_t)sizeof(int));
-    read(cfs_f_descriptor, &(sb.free_space_ptr), (size_t)sizeof(int));
-    read(cfs_f_descriptor, &(sb.end_meta_ptr), (size_t)sizeof(int));
-    read(cfs_f_descriptor, &(sb.start_meta_ptr), (size_t)sizeof(int));
+    // shitty life
+    //read(cfs_f_descriptor, &(sb.sb_magic), (size_t)sizeof(int));
+    //read(cfs_f_descriptor, &(sb.start_block_ptr), (size_t)sizeof(int*));
+    //read(cfs_f_descriptor, &(sb.free_space_ptr), (size_t)sizeof(int*));
+    //read(cfs_f_descriptor, &(sb.end_meta_ptr), (size_t)sizeof(int*));
+    //read(cfs_f_descriptor, &(sb.start_meta_ptr), (size_t)sizeof(int*));
+    read(cfs_f_descriptor, &sb, sizeof(cfs_super_block));
+
     if (check_sb(sb) == -1)
     {
         while(1){
@@ -430,6 +436,7 @@ int exec_command(cfs_command command){
 }
 
 
+// use find_file_disk(path)
 cfs_meta_ptr find_meta_by_name(char* path)
 {
     // if file at path not found, return nullptr
@@ -445,7 +452,7 @@ int* block_idx_to_disc_ptr(int idx)
         return nullptr;
     }
 
-    int result = 0;
+    int* result = 0;
     result = idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS; // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
 
     // check border ptrs
@@ -737,6 +744,12 @@ int format_fs(){
     // write sb
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET); // shift file pointer
     write(cfs_f_descriptor, &sb, sizeof(cfs_super_block)); // write
+    // shitty life
+    //write(cfs_f_descriptor, sb.sb_magic, sizeof(sb.sb_magic));
+    //write(cfs_f_descriptor, sb.start_block_ptr, sizeof(sb.start_block_ptr));
+    //write(cfs_f_descriptor, sb.free_space_ptr, sizeof(sb.free_space_ptr));
+    //write(cfs_f_descriptor, sb.end_meta_ptr, sizeof(sb.end_meta_ptr));
+    //write(cfs_f_descriptor, sb.start_meta_ptr, sizeof(sb.start_meta_ptr));
     //write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
 }
 
