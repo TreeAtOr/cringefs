@@ -29,7 +29,10 @@ int main(int argc, char* argv[]){
     else
     {
         // some shit
-        //printf("calc %p need %i\n", block_idx_to_disc_ptr(1), CFS_STARTPOS + CFS_SUPERBLOCK_SIZE);
+        //test printf("calc %p need %i\n", block_idx_to_disc_ptr(1), CFS_STARTPOS + CFS_SUPERBLOCK_SIZE);
+        //disk_ptr_to_block_idx(0x12fff);
+        //disk_ptr_to_meta_idx(0x5ffff - CFS_ONE_META_SIZE - CFS_ONE_BLOCK_SIZE);
+        meta_idx_to_disc_ptr(2);
         printf("Enter command:\n");
         parse_args();
         // like parser
@@ -453,7 +456,7 @@ int* block_idx_to_disc_ptr(int idx)
     }
 
     int* result = 0;
-    result = idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS; // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
+    result = (int*)(idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS); // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
 
     // check border ptrs
     if (result < sb.start_block_ptr - CFS_SUPERBLOCK_SIZE || result > sb.start_meta_ptr + CFS_ONE_META_SIZE){
@@ -465,17 +468,33 @@ int* block_idx_to_disc_ptr(int idx)
 }
 
 int disk_ptr_to_block_idx(int* ptr){
-    //printf("TODO convertion from disk ptr to block idx");
 
-    //int* idx = ((char*)ptr - CFS_STARTPOS - CFS_SUPERBLOCK_SIZE) / CFS_ONE_BLOCK_SIZE; // char* для того, чтобы смещение прибавлялось по байтам
+    int result = -1;
+    int intptr = (int)ptr;
+
+    result = (intptr - CFS_STARTPOS - CFS_SUPERBLOCK_SIZE) / CFS_ONE_BLOCK_SIZE;
+
+    return result;
 }
 
 int disk_ptr_to_meta_idx(int* ptr){
 
+    int result = -1;
+    int intptr = (int)ptr;
+
+    result = (CFS_ENDPOS - CFS_ONE_META_SIZE - intptr);
+    result =  result / CFS_ONE_META_SIZE;
+
+    return result;
 }
 
 int* meta_idx_to_disc_ptr(int idx){
 
+    int* result = nullptr;
+
+    result = (int*)(CFS_ENDPOS - CFS_ONE_META_SIZE - CFS_ONE_META_SIZE * idx);
+
+    return result;
 }
 
 
@@ -670,6 +689,8 @@ int create_file(char* path){
         return -1;
     }
 
+    printf("TODO: check if dir exists while creating file\n");
+
     int block_idx = find_empty_space_in_meta(1);
     int flag_packed = 0; // to know if packing happens
 
@@ -735,7 +756,7 @@ int format_fs(){
     sb.start_block_ptr = (int *)(CFS_STARTPOS + CFS_SUPERBLOCK_SIZE);
     sb.free_space_ptr = (int *)(sb.start_block_ptr);
 
-    sb.start_meta_ptr = (int *)(CFS_ENDPOS);
+    sb.start_meta_ptr = (int *)(CFS_ENDPOS - CFS_ONE_META_SIZE);
     sb.end_meta_ptr = (int *)(sb.start_meta_ptr);
 
     
