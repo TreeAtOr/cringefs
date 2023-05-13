@@ -96,7 +96,30 @@ int check_sb(cfs_super_block sb){
     else return 0;
 }
 
+int compare(char* first, char* second) {
+    for (int i = 0; first[i] != '\0'; i++) {
+        if (first[i] != second[i]) { return 0; }
+    }
+    return 1;
+}
 
+int checkFile(char* text) {
+    int flagComm = 0;
+    int flagSlesh = 0;
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == '.') flagComm = 1;
+        if (text[i] == '/') flagSlesh = 1;
+    }
+    if (flagComm && flagSlesh) return 1;
+    else 0;
+}
+
+int checkFolder(char* text) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] == '/') return 1;
+    }
+    return 0;
+}
 
 
 void parse_args(){
@@ -112,9 +135,252 @@ void parse_args(){
         // if good, exec_command() (use switch and cfs_command_type)
         // if exit return
     //}
+
+
+    const int maxLength = 100;
+    cfs_command cfs;
+    const char open[10] = "open";
+    const char close[10] = "close";
+    const char cat[10] = "cat";
+    const char rm[10] = "rm";
+    const char touch[10] = "touch";
+    const char cp[10] = "cp";
+    const char mv[10] = "mv";
+    const char mkdir[10] = "mkdir";
+    const char format[10] = "format";
+    const char exit[10] = "exit";
+
+    while (1) {
+        char str[100];
+        char command[10];
+        for (int j = 0; j < strlen(command); j++) command[j] = 0;
+        char argument1[50];
+        for (int j = 0; j < strlen(argument1); j++) argument1[j] = 0;
+        char argument2[50];
+        for (int j = 0; j < strlen(argument2); j++) argument2[j] = 0;
+        char prom[100];
+        char word[50];
+
+        int flagCommand = 0;//command flag
+        int flagErrorEnter = 0;//if the input is incorrect
+        int flagWord = 0;
+        int flagFile = 0;
+        int flagFolder = 0;
+
+        int promC = 0;
+
+        fgets(str, maxLength, stdin);
+        for (int i = 0; str[i - 1] != '\n'; i++, promC++) {
+
+            if (flagErrorEnter) {
+                printf("input error\n");
+                break;
+            }
+            if (str[i] == '\n' && !flagCommand)
+                printf("input error\n");
+
+            prom[promC] = str[i];
+
+            if (prom[promC] == ' ' || prom[promC] == '\n') { //find word
+                memset(word, 0, 50);
+                for (int j = 0; j < i; j++) { word[j] = prom[j]; }
+                word[promC] = '\0';
+                flagWord = 1;
+                for (int j = 0; j < strlen(prom); j++) prom[j] = 0;
+                promC = -1;
+            }
+
+            if (flagWord) {
+                if (compare(word, open)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, close)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    // printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, cat)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, rm)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, touch)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, cp)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    // printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, mv)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, mkdir)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, format)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    // printf("%s\n", command);
+                    flagCommand = 1;
+                }
+                else if (compare(word, exit)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    //printf("%s\n", command);
+                    flagCommand = 1;
+                }
+
+                else if (checkFile(word)) {
+                    flagFile = 1;
+                    if (argument1[0] == 0) for (int j = 0; j < 50; j++) argument1[j] = word[j];
+                    else for (int j = 0; j < 50; j++) argument2[j] = word[j];
+                    //printf("%s    %s\n", argument1, argument2);
+                }
+
+                else if (checkFolder(word)) {
+                    flagFolder = 1;
+                    if (argument1[0] == 0) for (int j = 0; j < 50; j++) argument1[j] = word[j];
+                    else for (int j = 0; j < 50; j++) argument2[j] = word[j];
+                    //printf("%s\n%s", argument1, argument2);
+                }
+
+                else flagErrorEnter = 1;
+                flagWord = 0;
+                //printf("end\n");
+            }
+        }
+
+        printf("sldkjflkjsd\n");
+        if (flagCommand) {
+
+
+            if (compare(command, open)) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                    printf("is open\n");
+                    cfs.command_type = OPEN;
+                    cfs.arg1 = argument1;
+                    cfs.num_args = 1;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, close)) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                    printf("is close\n");
+                    cfs.command_type = CLOSE;
+                    cfs.arg1 = argument1;
+                    cfs.num_args = 1;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, cat)) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                    printf("is cat\n");
+                    cfs.command_type = SHOW;
+                    cfs.arg1 = argument1;
+                    cfs.num_args = 1;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, rm)) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                    printf("is rm\n");
+                    cfs.command_type = DELETE;
+                    cfs.arg1 = argument1;
+                    cfs.num_args = 1;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, touch)) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                    printf("is touch\n");
+                    cfs.command_type = CREATE;
+                    cfs.arg1 = argument1;
+                    cfs.num_args = 1;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, cp)) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] != 0) {
+                    printf("is cp\n");
+                    cfs.command_type = COPY;
+                    cfs.arg1 = argument1;
+                    cfs.arg2 = argument2;
+                    cfs.num_args = 2;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, mv)) {
+                if (flagFile && flagFolder && argument1[0] != 0 && argument2[0] != 0) {
+                    printf("is move\n");
+                    cfs.command_type = MOVE;
+                    cfs.arg1 = argument1;
+                    cfs.arg2 = argument2;
+                    cfs.num_args = 2;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+            if (compare(command, mkdir)) {
+                if (!flagFile && flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                    printf("is mkdir\n");
+                    cfs.command_type = CREATEDIR;
+                    cfs.arg1 = argument1;
+                    cfs.num_args = 1;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, format)) {
+                if (!flagFile && !flagFolder && argument1[0] == 0 && argument2[0] == 0) {
+                    printf("is format\n");
+                    cfs.command_type = FORMAT;
+                    cfs.num_args = 0;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+            if (compare(command, exit)) {
+                if (!flagFile && !flagFolder && argument1[0] == 0 && argument2[0] == 0) {
+                    printf("is exit\n");
+                    cfs.command_type = EXIT;
+                    cfs.num_args = 0;
+                    exec_command(cfs);
+                }
+                else printf("enter eroor\n");
+            }
+
+        }
+    }
+    return;
     
 }
-
+//От глеба эта функция мне не нужна
 // parse str, put command in dst_command. If something goes wrong return -1
 int parse_str(char * str, cfs_command_ptr dst_command){
     // check str if it is command and it has correct arguments
@@ -122,7 +388,7 @@ int parse_str(char * str, cfs_command_ptr dst_command){
     
 }
 
-int exec_command(cfs_command_ptr command){
+int exec_command(cfs_command command){
 
     switch (command->command_type)
     {

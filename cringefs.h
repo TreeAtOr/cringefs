@@ -106,7 +106,7 @@ void parse_args();
 
 int parse_str(char* str, cfs_command_ptr dst_command);
 
-int exec_command(cfs_command_ptr command);
+int exec_command(cfs_command command);
 
 
 
