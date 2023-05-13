@@ -482,6 +482,7 @@ int cfs_fopen(char* path){
         return 0;
     }
     
+                            // replace with find_file_disk(path)
     cfs_meta_ptr meta_ptr = find_meta_by_name(path);
 
     if (meta_ptr == nullptr) // not found on disc
@@ -535,33 +536,6 @@ int show_file(char* path) {
     // if not foud
     // print no such file
 
-
-    if (find_file_table(path) != nullptr) {
-        // find file with path in table
-        // show on screen
-        printf("FILE '%s': \n%s\n", path, entry->file_memory);
-        return 0;
-    }
-    else {
-        // no such file in table
-        FILE* fp;
-        fp = fopen(path, "r");
-        if (fp == NULL) {
-            // no such file on disk
-            printf("No such file.\n");
-            return -1;
-        }
-        // find file on disk
-        // show on screen
-        char ch;
-        printf("FILE '%s': \n", path);
-        while ((ch = fgetc(fp)) != EOF) {
-            printf("%c", ch);
-        }
-        fclose(fp);
-        return 0;
-
-    }
 }
 
 
