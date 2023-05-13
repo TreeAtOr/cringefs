@@ -28,6 +28,8 @@ int main(int argc, char* argv[]){
     else
     {
         // some shit
+        printf("Enter command:\n");
+        parse_args();
         // like parser
         // поймать сигнал ctrl+c? дла корректного shutdown
         shutdown();
@@ -96,7 +98,7 @@ int check_sb(cfs_super_block sb){
     else return 0;
 }
 
-int compare(char* first, char* second) {
+int compare(char* first, const char* second) {
     for (int i = 0; first[i] != '\0'; i++) {
         if (first[i] != second[i]) { return 0; }
     }
@@ -274,7 +276,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, close)) {
@@ -285,7 +287,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, cat)) {
@@ -296,7 +298,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, rm)) {
@@ -307,7 +309,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, touch)) {
@@ -318,7 +320,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, cp)) {
@@ -330,7 +332,7 @@ void parse_args(){
                     cfs.num_args = 2;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, mv)) {
@@ -342,7 +344,7 @@ void parse_args(){
                     cfs.num_args = 2;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
             if (compare(command, mkdir)) {
                 if (!flagFile && flagFolder && argument1[0] != 0 && argument2[0] == 0) {
@@ -352,7 +354,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, format)) {
@@ -362,7 +364,7 @@ void parse_args(){
                     cfs.num_args = 0;
                     exec_command(cfs);
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
             if (compare(command, exit)) {
@@ -370,9 +372,9 @@ void parse_args(){
                     printf("is exit\n");
                     cfs.command_type = EXIT;
                     cfs.num_args = 0;
-                    exec_command(cfs);
+                    return(exec_command(cfs));
                 }
-                else printf("enter eroor\n");
+                else printf("enter error\n");
             }
 
         }
@@ -380,50 +382,43 @@ void parse_args(){
     return;
     
 }
-//От глеба эта функция мне не нужна
-// parse str, put command in dst_command. If something goes wrong return -1
-int parse_str(char * str, cfs_command_ptr dst_command){
-    // check str if it is command and it has correct arguments
-    //fill dst_command struct
-    
-}
 
 int exec_command(cfs_command command){
 
-    switch (command->command_type)
+    switch (command.command_type)
     {
     case OPEN:
         // open file with path <arg1>
-        cfs_fopen(command->arg1);
+        cfs_fopen(command.arg1);
         break;
     case CLOSE:
         // close file with path <arg1>
-        close_file(command->arg1);
+        close_file(command.arg1);
         break;
     case SHOW:
         // show file with path <arg1>
-        show_file(command->arg1);
+        show_file(command.arg1);
         break;
     case DELETE:
         // delete file with path <arg1>
-        delete_file(command->arg1);
+        delete_file(command.arg1);
         break;
     case CREATE:
         // create file with path <arg1>
-        create_file(command->arg1);
+        create_file(command.arg1);
         break;
     case COPY:
         // copy from <arg1>(path) to <arg2>(destination path) 
-        copy_file(command->arg1, command->arg2);
+        copy_file(command.arg1, command.arg2);
         break;
     case MOVE:
         // move from <arg1>(path) to <arg2>(destination path) 
-        move_file(command->arg1, command->arg2);
+        move_file(command.arg1, command.arg2);
         break;
     case EXIT:
         return 0;
     default:
-        // print err
+        printf("Debug: no command %i in exec_command\n", command.command_type);
         break;
     }
 }
