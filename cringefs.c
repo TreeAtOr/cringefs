@@ -50,11 +50,10 @@ int startup(char* device_path){
     //start reading superblock
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET);
     read(cfs_f_descriptor, &(sb.sb_magic), (size_t)sizeof(int));
-    read(cfs_f_descriptor, &(sb.start_block_ptr), (size_t)sizeof(int*));
-    read(cfs_f_descriptor, &(sb.free_space_ptr), (size_t)sizeof(int*));
-    read(cfs_f_descriptor, &(sb.end_meta_ptr), (size_t)sizeof(int*));
-    read(cfs_f_descriptor, &(sb.start_meta_ptr), (size_t)sizeof(int*));
-
+    read(cfs_f_descriptor, &(sb.start_block_ptr), (size_t)sizeof(int));
+    read(cfs_f_descriptor, &(sb.free_space_ptr), (size_t)sizeof(int));
+    read(cfs_f_descriptor, &(sb.end_meta_ptr), (size_t)sizeof(int));
+    read(cfs_f_descriptor, &(sb.start_meta_ptr), (size_t)sizeof(int));
     if (check_sb(sb) == -1)
     {
         while(1){
@@ -787,6 +786,26 @@ cfs_file_ptr find_file_table(char* path){
 // return ptr if found file else nullptr
 int* find_file_disk(char* path){
     // find on disk
+    int* ptr;
+    char finded = 0;
+    ptr = CFS_ENDPOS;
+    while (ptr >= sb.end_meta_ptr)
+    {
+        lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
+        char* name[CFS_FILE_PATH_LEN] = { NULL };
+        read(cfs_f_descriptor, &name, CFS_FILE_PATH_LEN);
+        if (compare(path, name))
+        {
+            printf("There's file %s!\n", path);
+            finded = 1;
+            return ptr;
+        }
+    }
+    if (finded == 0)
+    {
+        printf("There's no file %s :(\n", path);
+        return nullptr;
+    }
 }
 
 

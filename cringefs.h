@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "stdlib.h" // calloc
+#include "stdint.h" // uintptr_t
 #include <unistd.h> // read
 #include "fcntl.h"
 
