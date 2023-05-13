@@ -1,13 +1,6 @@
 #include "cringefs.h"
 
-/*
-/////////////////////////////////////READ THIS PLEASE///////////////////////////////////////
-/////////////I HAD TO CHANGE SB TYPE FROM CFS_SUPER_BLOCK_PTR TO CFS_SUPER_BLOCK////////////
-///////////////////////////////OTHERWISE READING ISN'T WORKING//////////////////////////////
-/////////////////////////////////IT SAYS "SEGMENTATION FAULT"///////////////////////////////
-*/
-
-int* cfs_f_descriptor = -1;
+int cfs_f_descriptor = nullptr;
 cfs_super_block sb;
 cfs_file_table ft;
 
@@ -35,6 +28,7 @@ int main(int argc, char* argv[]){
     else
     {
         // some shit
+        // like parser
         // поймать сигнал ctrl+c? дла корректного shutdown
         shutdown();
     }
@@ -52,7 +46,8 @@ int startup(char* device_path){
         return -1;
     }
     //start reading superblock
-    read(cfs_f_descriptor, &(sb.sb_magic), (size_t)sizeof(int*));
+    lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET);
+    read(cfs_f_descriptor, &(sb.sb_magic), (size_t)sizeof(int));
     read(cfs_f_descriptor, &(sb.start_block_ptr), (size_t)sizeof(int*));
     read(cfs_f_descriptor, &(sb.free_space_ptr), (size_t)sizeof(int*));
     read(cfs_f_descriptor, &(sb.end_meta_ptr), (size_t)sizeof(int*));
@@ -61,9 +56,9 @@ int startup(char* device_path){
     if (check_sb(sb) == -1)
     {
         while(1){
-            printf("Superblock of file %s isn't %p, do you want to formate file system? (y/n) ", device_path, CFS_MAGIC);
-            char* choice[2] = { NULL };
-            scanf("%s", &choice);
+            printf("Superblock of file %s isn't %i, do you want to formate file system? (y/n) ", device_path, CFS_MAGIC);
+            char choice[2] = { 0, 0 };
+            scanf("%s", choice);
             if (choice[0] == 'y' || choice[0] == 'Y')
             {
                 format_fs();
@@ -76,10 +71,8 @@ int startup(char* device_path){
                 printf("Well, goodbye\n");
                 return -1;
             }
-            else 
-            {
-                printf("Looks like it's wrong input, my friend :( \n");
-            }
+            else printf("Looks like it's wrong input, my friend :( \n");
+            
         }
     }
     else printf("Everything is OK\n");
@@ -103,7 +96,7 @@ int check_sb(cfs_super_block sb){
     else return 0;
 }
 
-/*
+
 
 
 void parse_args(){
@@ -189,7 +182,7 @@ int* block_idx_to_disc_ptr(int idx)
     result = idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS; // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
 
     // check border ptrs
-    if (result < sb->start_block_ptr - CFS_SUPERBLOCK_SIZE || result > sb->start_meta_ptr + CFS_ONE_META_SIZE){
+    if (result < sb.start_block_ptr - CFS_SUPERBLOCK_SIZE || result > sb.start_meta_ptr + CFS_ONE_META_SIZE){
         printf("Converted block idx %i -> %i out of borders\n", idx, result);
         return nullptr;
     }
@@ -229,7 +222,7 @@ int cfs_fopen(char* path){
     }
     else
     {
-/*
+
         int* to_disc_ptr = block_idx_to_disc_ptr(meta_ptr->start_block_idx);
 
         if (to_disc_ptr == nullptr)
@@ -245,7 +238,8 @@ int cfs_fopen(char* path){
             return -1; // error
         }
 
-        read(to_disc_ptr, buf, )
+        printf("TODO: decomment read in cfs_open");
+        //read(to_disc_ptr, buf, )
 
     }
 
@@ -255,7 +249,7 @@ int cfs_fopen(char* path){
     // read file, add file to table
     
 }
-*/
+
 
 int close_file(char* path){
     // read table until you find file with path
@@ -294,7 +288,7 @@ int shrink_file(char* path){
     // think
 }
 
-/*
+
 int copy_file(char* path, char* dst_path){
 
     // find file by path in table/disk
@@ -453,7 +447,7 @@ int find_empty_space_in_meta(int minimum_blocks_num){
 int pack_fs(){
     // hardcore
 }
-*/
+
 int format_fs(){
     // clear table of opened files
     clear_table();
@@ -461,14 +455,14 @@ int format_fs(){
 
     // reset superblock
     sb.sb_magic = CFS_MAGIC;
-    sb.start_block_ptr = CFS_STARTPOS + CFS_SUPERBLOCK_SIZE;
-    sb.free_space_ptr = sb.start_block_ptr;
+    sb.start_block_ptr = (int *)(CFS_STARTPOS + CFS_SUPERBLOCK_SIZE);
+    sb.free_space_ptr = (int *)(sb.start_block_ptr);
 
-    sb.start_meta_ptr = CFS_ENDPOS;
-    sb.end_meta_ptr = sb.start_meta_ptr;
+    sb.start_meta_ptr = (int *)(CFS_ENDPOS);
+    sb.end_meta_ptr = (int *)(sb.start_meta_ptr);
 
     
-    printf("%p, %p, %p, %p, %p\n",sb.sb_magic, sb.start_block_ptr, sb.free_space_ptr, sb.end_meta_ptr, sb.start_meta_ptr);
+    printf("%i, %p, %p, %p, %p\n",sb.sb_magic, sb.start_block_ptr, sb.free_space_ptr, sb.end_meta_ptr, sb.start_meta_ptr);
 
     // write sb
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET); // shift file pointer
@@ -485,7 +479,7 @@ int remove_from_table(char* path){
 int clear_table(){
     // clear all
 }
-/*
+
 //return ptr if found file else nullptr
 cfs_file_ptr find_file_table(char* path){
     // find in table
@@ -499,16 +493,16 @@ int* find_file_disk(char* path){
 
 int get_new_free_block_idx(){
 
-    int new_block_idx = disk_ptr_to_block_idx(sb->free_space_ptr);
+    int new_block_idx = disk_ptr_to_block_idx(sb.free_space_ptr);
 
     // ckeck if new block overlaps meta
-    if (sb->free_space_ptr + CFS_ONE_BLOCK_SIZE > sb->end_meta_ptr){
+    if (sb.free_space_ptr + CFS_ONE_BLOCK_SIZE > sb.end_meta_ptr){
         printf("New block with index %i overlaps meta\n", new_block_idx);
         return -1;
     }
 
     // everything is ok
-    sb->free_space_ptr += CFS_ONE_BLOCK_SIZE;
+    sb.free_space_ptr += CFS_ONE_BLOCK_SIZE;
     return new_block_idx;
 
 }
@@ -520,4 +514,3 @@ int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst){
     dst->cleared = src->cleared;
     dst->size = src->size;
 }
-*/

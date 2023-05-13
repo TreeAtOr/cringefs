@@ -22,7 +22,7 @@
 #endif
 
 typedef struct cfs_super_block_t{
-    int* sb_magic;
+    int sb_magic;
     int* start_block_ptr;
     int* free_space_ptr;
     int* end_meta_ptr;
