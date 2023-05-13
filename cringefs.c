@@ -161,15 +161,15 @@ void parse_args(){
     const char exit[10] = "exit";
 
     while (1) {
-        char str[100];
+        char str[255];
         char command[10];
         for (int j = 0; j < strlen(command); j++) command[j] = 0;
-        char argument1[50];
+        char argument1[245];
         for (int j = 0; j < strlen(argument1); j++) argument1[j] = 0;
-        char argument2[50];
+        char argument2[245];
         for (int j = 0; j < strlen(argument2); j++) argument2[j] = 0;
-        char prom[100];
-        char word[50];
+        char prom[255];
+        char word[245];
 
         int flagCommand = 0;//command flag
         int flagErrorEnter = 0;//if the input is incorrect
@@ -192,7 +192,7 @@ void parse_args(){
             prom[promC] = str[i];
 
             if (prom[promC] == ' ' || prom[promC] == '\n') { //find word
-                memset(word, 0, 50);
+                memset(word, 0, 245);
                 for (int j = 0; j < i; j++) { word[j] = prom[j]; }
                 word[promC] = '\0';
                 flagWord = 1;
@@ -254,15 +254,15 @@ void parse_args(){
 
                 else if (checkFile(word)) {
                     flagFile = 1;
-                    if (argument1[0] == 0) for (int j = 0; j < 50; j++) argument1[j] = word[j];
-                    else for (int j = 0; j < 50; j++) argument2[j] = word[j];
+                    if (argument1[0] == 0) for (int j = 0; j < 245; j++) argument1[j] = word[j];
+                    else for (int j = 0; j < 245; j++) argument2[j] = word[j];
                     //printf("%s    %s\n", argument1, argument2);
                 }
 
                 else if (checkFolder(word)) {
                     flagFolder = 1;
-                    if (argument1[0] == 0) for (int j = 0; j < 50; j++) argument1[j] = word[j];
-                    else for (int j = 0; j < 50; j++) argument2[j] = word[j];
+                    if (argument1[0] == 0) for (int j = 0; j < 245; j++) argument1[j] = word[j];
+                    else for (int j = 0; j < 245; j++) argument2[j] = word[j];
                     //printf("%s\n%s", argument1, argument2);
                 }
 
@@ -322,7 +322,7 @@ void parse_args(){
             }
 
             if (compare(command, touch)) {
-                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
+                if (flagFile || flagFolder && argument1[0] != 0 && argument2[0] == 0) {
                     printf("is touch\n");
                     cfs.command_type = CREATE;
                     cfs.arg1 = argument1;
