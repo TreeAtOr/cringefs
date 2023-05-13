@@ -525,7 +525,7 @@ int close_file(char* path){
     // delete it from table
 }
 
-int show_file(char* path){
+int show_file(char* path) {
 
     // find file with path in table
     // show on screen
@@ -534,7 +534,36 @@ int show_file(char* path){
     // show on screen
     // if not foud
     // print no such file
+
+
+    if (find_file_table(path) != nullptr) {
+        // find file with path in table
+        // show on screen
+        printf("FILE '%s': \n%s\n", path, entry->file_memory);
+        return 0;
+    }
+    else {
+        // no such file in table
+        FILE* fp;
+        fp = fopen(path, "r");
+        if (fp == NULL) {
+            // no such file on disk
+            printf("No such file.\n");
+            return -1;
+        }
+        // find file on disk
+        // show on screen
+        char ch;
+        printf("FILE '%s': \n", path);
+        while ((ch = fgetc(fp)) != EOF) {
+            printf("%c", ch);
+        }
+        fclose(fp);
+        return 0;
+
+    }
 }
+
 
 int write_file(cfs_file_ptr file_ptr){
     // calculate shift on disk of meta and block
