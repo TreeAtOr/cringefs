@@ -252,14 +252,14 @@ void parse_args(){
                 else if (checkFile(word)) {
                     flagFile = 1;
                     if (argument1[0] == 0) for (int j = 0; j < 245; j++) argument1[j] = word[j];
-                    else for (int j = 0; j < 50; j++) argument2[j] = word[j];
+                    else for (int j = 0; j < 245; j++) argument2[j] = word[j];
                     //printf("%s    %s\n", argument1, argument2);
                 }
 
                 else if (checkFolder(word)) {
                     flagFolder = 1;
                     if (argument1[0] == 0) for (int j = 0; j < 245; j++) argument1[j] = word[j];
-                    else for (int j = 0; j < 50; j++) argument2[j] = word[j];
+                    else for (int j = 0; j < 245; j++) argument2[j] = word[j];
                     //printf("%s\n%s", argument1, argument2);
                 }
 
