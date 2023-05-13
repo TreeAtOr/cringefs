@@ -7,6 +7,8 @@
 #include <unistd.h> // read
 #include "fcntl.h"
 
+#define DEBUG 1
+
 #define CFS_STARTPOS 0xffff // for formating system
 #define CFS_ENDPOS 0x5ffff
 
@@ -174,3 +176,6 @@ int get_new_free_block_idx();
 
 
 int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst);
+
+
+void debug_print(char* str);

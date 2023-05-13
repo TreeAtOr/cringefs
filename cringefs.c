@@ -264,7 +264,8 @@ void parse_args(){
             }
         }
 
-        printf("sldkjflkjsd\n");
+        //printf("sldkjflkjsd\n");
+
         if (flagCommand) {
 
 
@@ -372,7 +373,8 @@ void parse_args(){
                     printf("is exit\n");
                     cfs.command_type = EXIT;
                     cfs.num_args = 0;
-                    return(exec_command(cfs));
+                    //return(exec_command(cfs));
+                    return;
                 }
                 else printf("enter error\n");
             }
@@ -390,6 +392,7 @@ int exec_command(cfs_command command){
     case OPEN:
         // open file with path <arg1>
         cfs_fopen(command.arg1);
+        //debug_print("open command done");
         break;
     case CLOSE:
         // close file with path <arg1>
@@ -404,7 +407,8 @@ int exec_command(cfs_command command){
         delete_file(command.arg1);
         break;
     case CREATE:
-        // create file with path <arg1>
+    case CREATEDIR:
+        // create file/dir with path <arg1>
         create_file(command.arg1);
         break;
     case COPY:
@@ -414,6 +418,9 @@ int exec_command(cfs_command command){
     case MOVE:
         // move from <arg1>(path) to <arg2>(destination path) 
         move_file(command.arg1, command.arg2);
+        break;
+    case FORMAT:
+        format_fs();
         break;
     case EXIT:
         return 0;
@@ -743,6 +750,8 @@ int clear_table(){
 
 //return ptr if found file else nullptr
 cfs_file_ptr find_file_table(char* path){
+    //if not found
+    return nullptr;
     // find in table
 }
 
@@ -774,4 +783,10 @@ int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst){
     dst->is_dir = src->is_dir;
     dst->cleared = src->cleared;
     dst->size = src->size;
+}
+
+void debug_print(char* str){
+
+    if (DEBUG)
+        printf("Debug: %s", str);
 }
