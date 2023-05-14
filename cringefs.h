@@ -49,7 +49,6 @@ typedef struct cfs_block_t {
 } cfs_block;
 
 
-
 typedef struct cfs_file_t {
     cfs_meta_ptr meta_ptr;
     char* content;
@@ -61,13 +60,11 @@ typedef struct cfs_file_t {
 
 typedef struct cfs_file_table_t{
 
-    int table_size; // ���������� � �������
-    cfs_file_ptr* table; // ���� �������, ������ ���������� 
-    // ������ * !??
+    size_t table_size; // size of table
+    cfs_file_ptr* files; // table of opened files
+    size_t count_opened_files;
 
 } cfs_file_table;
-
-
 
 
 typedef enum cfs_command_type_t{
@@ -135,8 +132,6 @@ int delete_file(char* path); // delete from disk
 // creates only on disk
 int create_file(char* path); // create on disk
 
-cfs_file_ptr find_file_table(char* path); // returns ptr to file
-
 int* find_file_disk(char* path); // returns ptr to file on disk
 
 
@@ -154,6 +149,11 @@ int format_fs();
 
 
 
+void init_file_table();
+
+void destroy_table();
+
+cfs_file_ptr find_file_table(char* path); // returns ptr to file
 
 int add_to_table(cfs_file_ptr file);
 
@@ -161,6 +161,9 @@ int remove_from_table(char* path);
 
 int clear_table();
 
+void resize_file_table();
+
+void shift_array_of_files(int start_index)ж
 
 
 int disk_ptr_to_block_idx(int* ptr);
