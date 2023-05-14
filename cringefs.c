@@ -774,23 +774,6 @@ int format_fs(){
     //write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
 }
 
-
-
-int remove_from_table(char* path){
-    // find and clear
-}
-
-int clear_table(){
-    // clear all
-}
-
-//return ptr if found file else nullptr
-cfs_file_ptr find_file_table(char* path){
-    //if not found
-    return nullptr;
-    // find in table
-}
-
 // return ptr if found file else nullptr
 int* find_file_disk(char* path){
     // find on disk
@@ -845,4 +828,102 @@ void debug_print(char* str){
 
     if (DEBUG)
         printf("Debug: %s", str);
+}
+
+// initialization of file table
+void init_file_table() {
+    ft.table_size = 10;
+    ft.files = (cfs_file_ptr*)malloc(10*sizeof(cfs_file));
+    if (ft.files == NULL) {
+        printf("Error when malloc func was called in init_file_table()!\n");
+        exit(1);
+    } else {
+        ft.count_opened_files = 0;
+    }
+}
+
+// free memory of file table
+void destroy_table() {
+    for (int i = 0; i < ft.table_size; ++i) {
+        free(ft.files[i]);
+    }
+    free(ft.files);
+}
+
+// if file already in table return code = 0, if file was successfully added return code 1
+int add_to_table(cfs_file_ptr file) {
+    for (int i = 0; i < ft.count_opened_files; ++i) {
+        if (strcmp(ft.files[i]->meta_ptr->f_path, file->meta_ptr->f_path) == 0) {
+            return 0;
+        } 
+    }
+
+    if (ft.table_size == ft.count_opened_files) {
+        resize_file_table();
+    }
+
+    ft.files[ft.count_opened_files] = (cfs_file_ptr)malloc(sizeof(cfs_file));
+    if (ft.files[ft.count_opened_files] == NULL) {
+        printf("Error when malloc func was called in add_to_table()!\n");
+        exit(1);
+    }
+    ft.files[ft.count_opened_files] = file;
+    ft.count_opened_files++;
+    return 1;
+}
+
+// remove one file by path
+// if file was successfully deleted return code 0, if file was not found return code -1
+int remove_from_table(char* path){
+    for (int i = 0; i < ft.table_size; ++i) {
+        if (strcmp(ft.files[i]->meta_ptr->f_path, path) == 0) {
+            free(ft.files[i]);
+            shift_array_of_files(i);
+            ft.count_opened_files--;
+            return 0;
+        } 
+    }
+    return -1;
+}
+
+// return code -1 if table epmty, else return code 0
+int clear_table() {
+    if (ft.count_opened_files == 0) {
+        return -1;
+    }
+
+    for (int i = 0; i < ft.count_opened_files; ++i) {
+        free(ft.files[i]);
+        ft.files[i] = NULL;
+    }
+    ft.count_opened_files = 0;
+    return 0;
+}
+
+// return file ptr if found file else NULL
+cfs_file_ptr find_file_table(char* path) {
+    for (int i = 0; i < ft.table_size; ++i) {
+        if (strcmp(ft.files[i]->meta_ptr->f_path, path) == 0) {
+            return ft.files[i];
+        } 
+    }
+    return NULL;
+}
+
+// private func for file table
+void resize_file_table() {
+    ft.table_size += 10;
+    ft.files = (cfs_file_ptr*)realloc(ft.files, ft.table_size);
+    if (ft.files == NULL) {
+        printf("Error when realloc func was called in resize_file_table()!\n");
+        exit(1);
+    }
+}
+
+// private func for file table
+void shift_array_of_files(int start_index) {
+    for (int i = start_index; i < ft.count_opened_files - 1; ++i) {
+        ft.files[i] = ft.files[i + 1];
+        ft.files[i + 1] = NULL;
+    }
 }
