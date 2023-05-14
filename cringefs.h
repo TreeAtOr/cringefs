@@ -163,7 +163,7 @@ int clear_table();
 
 void resize_file_table();
 
-void shift_array_of_files(int start_index)ж
+void shift_array_of_files(int start_index);
 
 
 int disk_ptr_to_block_idx(int* ptr);
