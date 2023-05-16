@@ -10,8 +10,6 @@ int main(int argc, char* argv[]){
     // if not -> Houston, we have problems 
     assert(sizeof(cfs_meta) <= CFS_ONE_META_SIZE);
 
-
-
     // argv[1] это путь к файлу устройства(флешки) ( например "/dev/sda3" )
 
     printf("Debug: program starts\n");

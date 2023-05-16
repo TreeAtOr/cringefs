@@ -49,7 +49,6 @@ typedef struct cfs_block_t {
 } cfs_block;
 
 
-
 typedef struct cfs_file_t {
     cfs_meta_ptr meta_ptr;
     char* content;
@@ -64,10 +63,11 @@ typedef struct cfs_file_table_t{
     size_t table_size; // size of table
     cfs_file_ptr* files; // table of opened files
     size_t count_opened_files;
+    size_t table_size; // size of table
+    cfs_file_ptr* files; // table of opened files
+    size_t count_opened_files;
 
 } cfs_file_table;
-
-
 
 
 typedef enum cfs_command_type_t{
