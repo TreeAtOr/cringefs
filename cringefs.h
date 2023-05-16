@@ -135,9 +135,7 @@ int delete_file(char* path); // delete from disk
 // creates only on disk
 int create_file(char* path); // create on disk
 
-cfs_file_ptr find_file_table(char* path); // returns ptr to file
-
-int* find_file_disk(char* path); // returns ptr to file on disk
+cfs_meta_ptr find_file_disk(char* path);
 
 
 

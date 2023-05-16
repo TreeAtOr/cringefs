@@ -84,9 +84,12 @@ int startup(char* device_path){
             else printf("Looks like it's wrong input, my friend :( \n");
             
         }
+        return 1;
     }
-    else printf("Everything is OK\n");
-
+    else {
+        printf("Everything is OK\n");
+        return 1;
+    }
     // if something bad return -1
 }
 
@@ -121,7 +124,7 @@ int checkFile(char* text) {
         if (text[i] == '/') flagSlesh = 1;
     }
     if (flagComm && flagSlesh) return 1;
-    else 0;
+    else return 0;
 }
 
 int checkFolder(char* text) {
@@ -499,10 +502,11 @@ int* meta_idx_to_disc_ptr(int idx){
 
 
 
-int cfs_fopen(char* path){
+// if file already opened return code = -1, if successfully opened 0
+int cfs_fopen(char* path) {
 
 
-    if (find_file_table(path) != nullptr) // already opened
+    /* if (find_file_table(path) != nullptr) // already opened
     {
         return 0;
     }
@@ -536,12 +540,31 @@ int cfs_fopen(char* path){
         //read(to_disc_ptr, buf, )
 
     }
-
+ */
     // if file already in table return 0
     // read file paths from disk until you find path
     // if path not found return -1
     // read file, add file to table
-    
+
+    // if file was already opened
+    if (find_file_table(path) != NULL) {
+        return 0;
+    }
+
+    // if file not found on disk
+    cfs_meta_ptr pointer_on_meta = find_file_disk(path);
+    if (pointer_on_meta == NULL) {
+        printf("Error in cfs_fopen because file not found!\n");
+        return -1;
+    }
+
+    cfs_file file_for_open;
+    file_for_open.content = malloc(pointer_on_meta->size);
+
+    lseek(cfs_f_descriptor, (long)block_idx_to_disc_ptr(pointer_on_meta->start_block_idx), SEEK_SET);
+    read(cfs_f_descriptor, file_for_open.content, pointer_on_meta->size);
+    add_to_table(&file_for_open);
+    return 0;
 }
 
 
@@ -774,12 +797,11 @@ int format_fs(){
     //write(cfs_f_descriptor, &sb, CFS_SUPERBLOCK_SIZE);
 }
 
-// return ptr if found file else nullptr
-int* find_file_disk(char* path){
+cfs_meta_ptr find_file_disk(char* path) {
     // find on disk
     int* ptr;
-    char finded = 0;
-    ptr = CFS_ENDPOS;
+    char found = 0;
+    ptr = (int*)CFS_ENDPOS;
     while (ptr >= sb.end_meta_ptr)
     {
         lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
@@ -788,14 +810,16 @@ int* find_file_disk(char* path){
         if (compare(path, name))
         {
             printf("There's file %s!\n", path);
-            finded = 1;
-            return ptr;
+            found = 1;
+            cfs_meta_ptr meta_for_file = (cfs_meta_ptr)malloc(sizeof(cfs_meta));
+            read(cfs_f_descriptor, &meta_for_file, sizeof(*meta_for_file));
+            return meta_for_file;
         }
     }
-    if (finded == 0)
+    if (found == 0)
     {
         printf("There's no file %s :(\n", path);
-        return nullptr;
+        return NULL;
     }
 }
 
