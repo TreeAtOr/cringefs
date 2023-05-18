@@ -864,6 +864,7 @@ cfs_meta_ptr find_file_disk(char* path) {
     // find on disk
     int* ptr;
     char found = 0;
+    char deleted = NULL;
     ptr = (int*)CFS_ENDPOS;
     while (ptr >= sb.end_meta_ptr)
     {
@@ -874,10 +875,20 @@ cfs_meta_ptr find_file_disk(char* path) {
         {
             printf("There's file %s!\n", path);
             found = 1;
-            cfs_meta_ptr meta_for_file = (cfs_meta_ptr)malloc(sizeof(cfs_meta));
-            lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
-            read(cfs_f_descriptor, meta_for_file, sizeof(*meta_for_file));
-            return meta_for_file;
+            lseek(cfs_f_descriptor, 2 * sizeof(int), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
+            read(cfs_f_descriptor, deleted, sizeof(char));
+            if (deleted != 0)
+            {
+                printf("File %s is deleted!\n", path);
+                return NULL;
+            }
+            else 
+            {
+                cfs_meta_ptr meta_for_file = (cfs_meta_ptr)malloc(sizeof(cfs_meta));
+                lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
+                read(cfs_f_descriptor, meta_for_file, sizeof(*meta_for_file));
+                return meta_for_file;
+            }
         }
         ptr = (char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE);
     }
