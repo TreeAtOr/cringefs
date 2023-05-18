@@ -826,10 +826,11 @@ cfs_meta_ptr find_file_disk(char* path) {
             printf("There's file %s!\n", path);
             found = 1;
             cfs_meta_ptr meta_for_file = (cfs_meta_ptr)malloc(sizeof(cfs_meta));
+            lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
             read(cfs_f_descriptor, meta_for_file, sizeof(*meta_for_file));
             return meta_for_file;
         }
-        ptr -= (uintptr_t)(CFS_ONE_META_SIZE);
+        ptr = (char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE);
     }
     if (found == 0)
     {
