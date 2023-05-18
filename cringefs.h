@@ -63,10 +63,6 @@ typedef struct cfs_file_table_t{
     size_t table_size; // size of table
     cfs_file_ptr* files; // table of opened files
     size_t count_opened_files;
-    size_t table_size; // size of table
-    cfs_file_ptr* files; // table of opened files
-    size_t count_opened_files;
-
 } cfs_file_table;
 
 
