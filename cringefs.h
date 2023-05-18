@@ -28,7 +28,7 @@ typedef struct cfs_super_block_t{
     int sb_magic;
     int* start_block_ptr;
     int* free_space_ptr;
-    int* end_meta_ptr;
+    int* end_meta_ptr; // last meta; if == CFS_CFS_ENDPOS then no files in fs :)
     int* start_meta_ptr;
 } cfs_super_block, *cfs_super_block_ptr;
 
@@ -98,6 +98,8 @@ int startup(char* device_path);
 int shutdown();
 
 int check_sb(cfs_super_block sb);
+// save superblock on disk
+void save_sb();
 
 
 
@@ -114,7 +116,7 @@ int close_file(char* path); // unload from table
 int show_file(char* path); // show on screen
 
 // use during creation of new file to save it on disk
-int write_file(cfs_file_ptr file_ptr); // save to disk // not needed 11.05.23 15:36 thinking
+int write_file(cfs_file_ptr file_ptr, int meta_idx); // save to disk // not needed 11.05.23 15:36 thinking
 
 int save_file(char* path); // save file from table to disk (if needed)
 
@@ -178,9 +180,24 @@ int* meta_idx_to_disc_ptr(int idx);
 // get free block from end of blocks in fs, return index
 int get_new_free_block_idx();
 
+// add get_new_free_meta_idx
+
 
 
 int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst);
+// zero fill of meta
+//void init_meta();
+
+//  read meta from disk starting from disk_meta_ptr address
+void read_meta(int* disk_meta_ptr, cfs_meta_ptr dst_meta);
+
+// write meta to disk starting from disk_meta_ptr address
+void write_meta(int* disk_meta_ptr, cfs_meta_ptr meta);
 
 
 void debug_print(char* str);
+
+// show all names of files on disk
+void debug_print_files_meta_on_disk();
+
+
