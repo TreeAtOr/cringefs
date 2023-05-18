@@ -442,6 +442,13 @@ cfs_meta_ptr find_meta_by_name(char* path)
     // else return meta_ptr
 }
 
+int find_meta_idx_by_path(char* path)
+{
+    // todo
+
+    return 0;
+}
+
 int* block_idx_to_disc_ptr(int idx)
 {
     // if invalid return nullptr
@@ -562,9 +569,8 @@ int cfs_fopen(char* path) {
 
 
 int close_file(char* path){
-    // read table until you find file with path
-    // save it
-    // delete it from table
+    save_file(path);
+    remove_from_table(path);
 }
 
 int show_file(char* path) {
@@ -598,12 +604,55 @@ int save_file(char* path){
     // else just write to disk
 }
 
-int extend_file(char* path){
-    // think 
+int find_new_space(int _size)
+{
+    int new_start_idx = 0;
+    // for all metas? check size?
+    // todo
+    return new_start_idx;
 }
 
-int shrink_file(char* path){
-    // think
+
+
+int extend_file(cfs_meta_ptr _meta, int _nsize)
+{
+    int new_place = find_new_space(_nsize);
+    // move file data to new place
+    // todo
+
+    _meta->size = _nsize;
+    _meta->start_block_idx = new_place;
+    write_meta(find_meta_idx_by_path(_meta->f_path), _meta);
+
+    return 0;
+}
+
+int shrink_file(cfs_meta_ptr _meta, int _nsize)
+{
+    _meta->size = _nsize;
+
+    write_meta(find_meta_idx_by_path(_meta->f_path), _meta);
+
+    return 0;
+}
+
+
+int resize_file(char* _path, int _new_size)
+{
+    cfs_meta_ptr file_meta_ptr = find_file_disk(path);
+    if (file_meta_ptr == NULL)
+        return -1;
+    if (file_meta_ptr->size == _new_size)
+    {
+        return -1; // 
+    }
+
+    if (file_meta_ptr->size < _new_size)
+        shrink_file(file_meta_ptr, _new_size);
+    else
+        extend_file(file_meta_ptr, _new_size);
+
+    return 0;
 }
 
 
