@@ -964,7 +964,7 @@ void debug_print(char* str){
 // initialization of file table
 void init_file_table() {
     ft.table_size = 10;
-    ft.files = (cfs_file_ptr*)malloc(10*sizeof(cfs_file));
+    ft.files = (cfs_file_ptr*)malloc(10*sizeof(cfs_file_ptr));
     if (ft.files == NULL) {
         printf("Error when malloc func was called in init_file_table()!\n");
         exit(1);
@@ -973,7 +973,7 @@ void init_file_table() {
     }
 }
 
-// free memory of file table
+// destroy of file table
 void destroy_table() {
     for (int i = 0; i < ft.table_size; ++i) {
         free(ft.files[i]);
@@ -1018,6 +1018,7 @@ int remove_from_table(char* path){
 }
 
 // return code -1 if table epmty, else return code 0
+// free memory for files in file table, but not destroy
 int clear_table() {
     if (ft.count_opened_files == 0) {
         return -1;
@@ -1044,7 +1045,7 @@ cfs_file_ptr find_file_table(char* path) {
 // private func for file table
 void resize_file_table() {
     ft.table_size += 10;
-    ft.files = (cfs_file_ptr*)realloc(ft.files, ft.table_size);
+    ft.files = (cfs_file_ptr*)realloc(ft.files, ft.table_size*sizeof(cfs_file_ptr));
     if (ft.files == NULL) {
         printf("Error when realloc func was called in resize_file_table()!\n");
         exit(1);
