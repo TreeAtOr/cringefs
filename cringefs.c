@@ -121,27 +121,20 @@ int checkFile(char* text) {
 }
 
 int checkFolder(char* text) {
+    int countFold = 0;
+    int flagtDot = 1;
     for (int i = 0; text[i] != '\0'; i++) {
-        if (text[i] == '/') return 1;
+        if (text[i] == '/') countFold++;
+        if (text[i] == '.') flagtDot = 0;
     }
-    return 0;
+
+    if (countFold == 1 && flagtDot) return 1;
+    if (countFold >= 2) return 1;
+    else return 0;
 }
 
 
 void parse_args(){
-
-    // Для Глеба:
-    // Список команд указан в комментариях к энуму cfs_command_type_t
-    // Задача: отпарсить пользовательский ввод и запихать аргументы в структуру cfs_command_t
-    // На основе этой структуры будет выполняться команда в файловой системе
-    //while (1)
-    //{
-        // read str, parse_str(char* str, ...);
-        // if bad str, message
-        // if good, exec_command() (use switch and cfs_command_type)
-        // if exit return
-    //}
-
 
     const int maxLength = 100;
     cfs_command cfs;
@@ -155,6 +148,7 @@ void parse_args(){
     const char mkdir[10] = "mkdir";
     const char format[10] = "format";
     const char exit[10] = "exit";
+    const char debug[10] = "debug";
 
     while (1) {
         char str[255];
@@ -178,12 +172,11 @@ void parse_args(){
         fgets(str, maxLength, stdin);
         for (int i = 0; str[i - 1] != '\n'; i++, promC++) {
 
-            if (flagErrorEnter) {
-                printf("input error\n");
-                break;
-            }
-            if (str[i] == '\n' && !flagCommand)
-                printf("input error\n");
+            /* if (flagErrorEnter) {
+                 printf("input error (flag error)\n");
+                 break;
+             }*/
+
 
             prom[promC] = str[i];
 
@@ -247,31 +240,36 @@ void parse_args(){
                     //printf("%s\n", command);
                     flagCommand = 1;
                 }
+                else if (compare(word, debug)) {
+                    for (int j = 0; j < 10; j++) command[j] = word[j];
+                    flagCommand = 1;
+                }
 
-                else if (checkFile(word)) {
+                if (checkFile(word)) {
                     flagFile = 1;
                     if (argument1[0] == 0) for (int j = 0; j < 245; j++) argument1[j] = word[j];
                     else for (int j = 0; j < 245; j++) argument2[j] = word[j];
                     //printf("%s    %s\n", argument1, argument2);
                 }
 
-                else if (checkFolder(word)) {
+                if (checkFolder(word)) {
                     flagFolder = 1;
                     if (argument1[0] == 0) for (int j = 0; j < 245; j++) argument1[j] = word[j];
                     else for (int j = 0; j < 245; j++) argument2[j] = word[j];
                     //printf("%s\n%s", argument1, argument2);
                 }
 
-                else flagErrorEnter = 1;
+                //flagErrorEnter = 1;
                 flagWord = 0;
                 //printf("end\n");
+                if (str[i] == '\n' && !flagCommand)
+                    printf("input error (/n !flagCommand)\n");
             }
         }
 
         //printf("sldkjflkjsd\n");
 
         if (flagCommand) {
-
 
             if (compare(command, open)) {
                 if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] == 0) {
@@ -281,7 +279,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error open\n");
             }
 
             if (compare(command, close)) {
@@ -292,7 +290,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error close\n");
             }
 
             if (compare(command, cat)) {
@@ -303,7 +301,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error cat\n");
             }
 
             if (compare(command, rm)) {
@@ -314,7 +312,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error rm\n");
             }
 
             if (compare(command, touch)) {
@@ -325,7 +323,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error touch\n");
             }
 
             if (compare(command, cp)) {
@@ -337,7 +335,7 @@ void parse_args(){
                     cfs.num_args = 2;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error cp\n");
             }
 
             if (compare(command, mv)) {
@@ -349,7 +347,7 @@ void parse_args(){
                     cfs.num_args = 2;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error mv\n");
             }
             if (compare(command, mkdir)) {
                 if (!flagFile && flagFolder && argument1[0] != 0 && argument2[0] == 0) {
@@ -359,7 +357,7 @@ void parse_args(){
                     cfs.num_args = 1;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error mkdir\n");
             }
 
             if (compare(command, format)) {
@@ -369,7 +367,7 @@ void parse_args(){
                     cfs.num_args = 0;
                     exec_command(cfs);
                 }
-                else printf("enter error\n");
+                else printf("enter error format\n");
             }
 
             if (compare(command, exit)) {
@@ -380,12 +378,13 @@ void parse_args(){
                     //return(exec_command(cfs));
                     return;
                 }
-                else printf("enter error\n");
+                else printf("enter error exit\n");
             }
 
         }
     }
     return;
+
     
 }
 
