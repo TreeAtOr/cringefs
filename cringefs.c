@@ -1006,7 +1006,7 @@ int add_to_table(cfs_file_ptr file) {
 // remove one file by path
 // if file was successfully deleted return code 0, if file was not found return code -1
 int remove_from_table(char* path){
-    for (int i = 0; i < ft.table_size; ++i) {
+    for (int i = 0; i < ft.count_opened_files; ++i) {
         if (strcmp(ft.files[i]->meta_ptr->f_path, path) == 0) {
             free(ft.files[i]);
             shift_array_of_files(i);
@@ -1034,7 +1034,7 @@ int clear_table() {
 
 // return file ptr if found file else NULL
 cfs_file_ptr find_file_table(char* path) {
-    for (int i = 0; i < ft.table_size; ++i) {
+    for (int i = 0; i < ft.count_opened_files; ++i) {
         if (strcmp(ft.files[i]->meta_ptr->f_path, path) == 0) {
             return ft.files[i];
         } 
