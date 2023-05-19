@@ -563,6 +563,7 @@ int cfs_fopen(char* path) {
     lseek(cfs_f_descriptor, (long)block_idx_to_disc_ptr(pointer_on_meta->start_block_idx), SEEK_SET);
     read(cfs_f_descriptor, file_for_open.content, pointer_on_meta->size);
     add_to_table(&file_for_open);
+    printf("opening completed\n");
     return 0;
 }
 
@@ -582,6 +583,36 @@ int show_file(char* path) {
     // if not foud
     // print no such file
 
+    cfs_file_ptr file_to_read = find_file_table(path);
+    while(1)
+    {
+        if (file_to_read != NULL)
+        {
+            printf("File is open!\n");
+            if (file_to_read->meta_ptr->size != 0)
+            {
+                printf("%c\n", file_to_read->content);
+                break;
+            }
+            else
+            {
+                printf("File is empty!\n");
+                return -1;
+            }
+        }
+        else 
+        {
+            if (cfs_fopen(path) == -1)
+                return -1;
+            else
+            {
+                printf("Opening of file...\n");
+                file_to_read = find_file_table(path);
+                printf("file is opened\n");
+            }
+        }
+    }
+    return 1;
 }
 
 
@@ -638,7 +669,7 @@ int shrink_file(cfs_meta_ptr _meta, int _nsize)
 
 int resize_file(char* _path, int _new_size)
 {
-    cfs_meta_ptr file_meta_ptr = find_file_disk(path);
+    cfs_meta_ptr file_meta_ptr = find_file_disk(_path);
     if (file_meta_ptr == NULL)
         return -1;
     if (file_meta_ptr->size == _new_size)
