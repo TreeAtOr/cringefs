@@ -964,7 +964,7 @@ void debug_print(char* str){
 // initialization of file table
 void init_file_table() {
     ft.table_size = 10;
-    ft.files = (cfs_file_ptr*)malloc(10*sizeof(cfs_file_ptr));
+    ft.files = (cfs_file_ptr*)malloc(ft.table_size*sizeof(cfs_file_ptr));
     if (ft.files == NULL) {
         printf("Error when malloc func was called in init_file_table()!\n");
         exit(1);
@@ -975,7 +975,7 @@ void init_file_table() {
 
 // destroy of file table
 void destroy_table() {
-    for (int i = 0; i < ft.table_size; ++i) {
+    for (int i = 0; i < ft.count_opened_files; ++i) {
         free(ft.files[i]);
     }
     free(ft.files);
