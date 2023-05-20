@@ -478,7 +478,7 @@ int find_meta_by_name(char* path)
             else 
             {
                 lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
-                int index = disk_ptr_to_meta_idx(ptr);
+                int index = disk_ptr_to_meta_idx((int*)((char*)ptr - CFS_ONE_META_SIZE));
                 return index;
             }
         }
@@ -1082,7 +1082,11 @@ void debug_print_files_meta_on_disk(){
     int file_counter = 0;
     while(meta_ptr >= sb.end_meta_ptr){
         read_meta(meta_ptr, &buffer_meta);
-        printf("File %2i with name: %s\n", file_counter, buffer_meta.f_path);
+        printf("File %2i with name: %s ", file_counter, buffer_meta.f_path);
+        if (buffer_meta.cleared == 1)
+            printf("(deleted)\n");
+        else
+            printf("\n");
         file_counter++;
         meta_ptr = (int*)((char*)meta_ptr - (uintptr_t)CFS_ONE_META_SIZE);
     }
