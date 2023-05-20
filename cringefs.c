@@ -449,7 +449,7 @@ int exec_command(cfs_command command){
 }
 
 
-// use find_file_disk(path)
+// on disk. Returns -1 if no file / it is deleted
 int find_meta_by_name(char* path)
 {
     int* ptr;
@@ -622,11 +622,9 @@ int write_file(cfs_file_ptr file_ptr, int meta_idx){
 
 int save_file(cfs_file_ptr file){
 
-    printf("TODO write save_file\n");
-    return -1;
 
     // find place of file on disk
-    int idx = find_file_disk("replace this line\n");
+    int idx = find_meta_by_name(file->meta_ptr->f_path);
     if (idx < 0){
         printf("Can not save file %s - place for file on disk not found\n", file->meta_ptr->f_path);
         return -1;
@@ -897,7 +895,7 @@ int format_fs(){
     sb.end_meta_ptr = (int *)(CFS_ENDPOS);
 
     
-    printf("%i, %p, %p, %p, %p\n",sb.sb_magic, sb.start_block_ptr, sb.free_space_ptr, sb.end_meta_ptr, sb.start_meta_ptr);
+    debug_print_sb();
 
     // write sb
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET); // shift file pointer
@@ -910,10 +908,10 @@ cfs_meta_ptr find_file_disk(char* path) {
     int* ptr;
     char found = 0;
     char deleted = NULL;
-    ptr = (int*)CFS_ENDPOS;
+    ptr = (int*)(CFS_ENDPOS - CFS_ONE_META_SIZE);
     while (ptr >= sb.end_meta_ptr)
     {
-        lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
+        lseek(cfs_f_descriptor, (uintptr_t)ptr, SEEK_SET);
         char* name[CFS_FILE_PATH_LEN] = { NULL };
         read(cfs_f_descriptor, &name, CFS_FILE_PATH_LEN);
         if (compare(path, name))
@@ -930,7 +928,7 @@ cfs_meta_ptr find_file_disk(char* path) {
             else 
             {
                 cfs_meta_ptr meta_for_file = (cfs_meta_ptr)malloc(sizeof(cfs_meta));
-                lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
+                lseek(cfs_f_descriptor, (uintptr_t)ptr, SEEK_SET);
                 read(cfs_f_descriptor, meta_for_file, sizeof(*meta_for_file));
                 return meta_for_file;
             }
@@ -1082,12 +1080,17 @@ void debug_print_files_meta_on_disk(){
 
     cfs_meta buffer_meta;
     int file_counter = 0;
-    do{
+    while(meta_ptr >= sb.end_meta_ptr){
         read_meta(meta_ptr, &buffer_meta);
         printf("File %2i with name: %s\n", file_counter, buffer_meta.f_path);
         file_counter++;
         meta_ptr = (char*)meta_ptr - (uintptr_t)CFS_ONE_META_SIZE;
-    }while(meta_ptr >= sb.end_meta_ptr);
+    }
+}
+
+void debug_print_sb(){
+    if (DEBUG_ON)
+        printf("%i, %p, %p, %p, %p\n",sb.sb_magic, sb.start_block_ptr, sb.free_space_ptr, sb.end_meta_ptr, sb.start_meta_ptr);
 }
 
 void read_meta(int* disk_meta_ptr, cfs_meta_ptr dst_meta){
