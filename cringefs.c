@@ -454,7 +454,7 @@ int find_meta_by_name(char* path)
 {
     int* ptr;
     char found = 0;
-    char deleted = NULL;
+    char deleted = 0;
     ptr = (int*)CFS_ENDPOS;
     while (ptr >= sb.end_meta_ptr)
     {
@@ -466,11 +466,11 @@ int find_meta_by_name(char* path)
             printf("There's file %s!\n", path);
             found = 1;
             lseek(cfs_f_descriptor, 2 * sizeof(int) + sizeof(char), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
-            read(cfs_f_descriptor, deleted, sizeof(char));
+            read(cfs_f_descriptor, &deleted, sizeof(char));
             if (deleted != 0)
             {
                 printf("File %s is deleted!\n", path);
-                return NULL;
+                return -1;
             }
             else 
             {
@@ -484,7 +484,7 @@ int find_meta_by_name(char* path)
     if (found == 0)
     {
         printf("There's no file %s :(\n", path);
-        return NULL;
+        return -1;
     }
 }
 
