@@ -590,6 +590,19 @@ int close_file(cfs_file_ptr file){
     return 0;
 }
 
+int add_text_to_file(char* path) {
+    cfs_file_ptr searched_file = cfs_fopen(path);
+    if (searched_file == NULL) return -1;
+
+    printf("Enter text to add in file: ");
+    char buffer[1024];
+    scanf("%s", buffer);
+    memcpy(searched_file->content + strlen(searched_file->content), buffer, strlen(buffer) + 1);    
+    printf("Successfully edit content of file!\n");
+    
+    return 0;
+}
+
 // if file not opened return code -1, if file was successfully opened return code 0
 int show_file(char* path) {
     
@@ -1104,3 +1117,4 @@ void save_sb(){
     lseek(cfs_f_descriptor, CFS_STARTPOS, SEEK_SET);
     write(cfs_f_descriptor, &sb, sizeof(sb));
 }
+

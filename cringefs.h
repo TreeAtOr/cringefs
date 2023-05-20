@@ -115,6 +115,8 @@ int close_file(cfs_file_ptr file); // unload from table
 
 int show_file(char* path); // show on screen
 
+int add_text_to_file(char* path); // adding text to file
+
 // use during creation of new file to save it on disk
 int write_file(cfs_file_ptr file_ptr, int meta_idx); // save to disk // not needed 11.05.23 15:36 thinking
 
@@ -199,7 +201,5 @@ void debug_print(char* str);
 
 // show all names of files on disk
 void debug_print_files_meta_on_disk();
-
-int add_text_to_file();
 
 
