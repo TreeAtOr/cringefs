@@ -438,6 +438,7 @@ int exec_command(cfs_command command){
         break;
     case DEBUG:
         // insert your functions here. Don`t forget to delete after use
+        debug_print_files_meta_on_disk();
         break;
     case EXIT:
         return 0;
@@ -865,7 +866,7 @@ int create_file(char* path){
         meta.cleared = 0;
         // temporary content
         char content[CFS_ONE_BLOCK_SIZE];
-        char create_msg[] = "File recently created\n";
+        char create_msg[] = "File recently created\0";
         strcpy(content, create_msg);
         // remember that this file deletes after exiting function
         cfs_file new_file;
@@ -883,7 +884,7 @@ int create_file(char* path){
         // subdivide meta
     }
 
-    debug_print_files_meta_on_disk();
+    //debug_print_files_meta_on_disk();
    
     return 0;
 }
