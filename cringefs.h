@@ -8,7 +8,7 @@
 #include <unistd.h> // read
 #include "fcntl.h"
 
-#define DEBUG 1
+#define DEBUG_ON 1
 
 #define CFS_STARTPOS 0xffff // for formating system
 #define CFS_ENDPOS 0x5ffff
@@ -78,7 +78,8 @@ typedef enum cfs_command_type_t{
     FORMAT,   // format
     EXTEND,   // command is needed or it is inner function?
     SHRINK,   // command is needed or it is inner function?
-    EXIT      // exit
+    EXIT,     // exit
+    DEBUG
     // etc.
 } cfs_command_type;
 

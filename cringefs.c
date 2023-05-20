@@ -380,6 +380,15 @@ void parse_args(){
                 }
                 else printf("enter error exit\n");
             }
+            if (compare(command, debug)) {
+                if (!flagFile && !flagFolder && argument1[0] == 0 && argument2[0] == 0) {
+                    printf("Debug section\n");
+                    cfs.command_type = DEBUG;
+                    cfs.num_args = 0;
+                    exec_command(cfs);
+                }
+                else printf("enter debug exit\n");
+            }
 
         }
     }
@@ -424,6 +433,9 @@ int exec_command(cfs_command command){
         break;
     case FORMAT:
         format_fs();
+        break;
+    case DEBUG:
+        // insert your functions here. Don`t forget to delete after use
         break;
     case EXIT:
         return 0;
@@ -957,7 +969,7 @@ int copy_meta(cfs_meta_ptr src, cfs_meta_ptr dst){
 
 void debug_print(char* str){
 
-    if (DEBUG)
+    if (DEBUG_ON)
         printf("Debug: %s", str);
 }
 
