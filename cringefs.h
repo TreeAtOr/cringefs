@@ -109,7 +109,7 @@ int exec_command(cfs_command command);
 
 int find_meta_by_name(char* path);
 
-int cfs_fopen(char* path); // load to table
+cfs_file_ptr cfs_fopen(char* path); // load to table
 
 int close_file(cfs_file_ptr file); // unload from table
 
