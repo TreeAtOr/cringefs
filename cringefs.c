@@ -740,9 +740,6 @@ int copy_file(char* path, char* dst_path){
 
 int move_file(char* path, char* dst_path){
 
-    printf("TODO move_file\n");
-    return -1;
-
     // check if file with dst_path already exists
     int dst_file_idx_disk = find_meta_by_name(dst_path);
     if (dst_file_idx_disk > -1){
@@ -758,10 +755,9 @@ int move_file(char* path, char* dst_path){
     }
 
     // just replace path in file
-    cfs_fopen(path);
-    cfs_file_ptr file_ptr = find_file_table(path);
+    cfs_file_ptr file_ptr = cfs_fopen(path);
     strcpy(file_ptr->meta_ptr->f_path, dst_path);
-    save_file(file_ptr);
+    write_file(file_ptr, file_idx_disk);
 
     return 0;
 }
