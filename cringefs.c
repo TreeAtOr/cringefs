@@ -341,7 +341,7 @@ void parse_args(){
             }
 
             if (compare(command, mv)) {
-                if (flagFile || flagFolder && argument1[0] != 0 && argument2[0] != 0) {
+                if (flagFile && !flagFolder && argument1[0] != 0 && argument2[0] != 0) {
                     printf("is move\n");
                     cfs.command_type = MOVE;
                     cfs.arg1 = argument1;
