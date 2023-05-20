@@ -579,10 +579,18 @@ int cfs_fopen(char* path) {
     return 0;
 }
 
+// file must exist in file table
+int close_file(cfs_file_ptr file){
 
-int close_file(char* path){
-    save_file(path);
-    remove_from_table(path);
+    int code;
+
+    code = save_file(file);
+    if (code < 0){
+        printf("Can not close file %s\n");
+        return -1;
+    }
+    remove_from_table(file->meta_ptr->f_path);
+    return 0;
 }
 
 int show_file(char* path) {
@@ -640,9 +648,19 @@ int write_file(cfs_file_ptr file_ptr, int meta_idx){
     return 0;
 }
 
-int save_file(char* path){
-    // find file with path in table
-    // if not found return -1
+int save_file(cfs_file_ptr file){
+
+    printf("TODO write save_file\n");
+    return -1;
+
+    // find place of file on disk
+    int idx = find_file_disk("replace this line\n");
+    if (idx < 0){
+        printf("Can not save file %s - place for file on disk not found\n", file->meta_ptr->f_path);
+        return -1;
+    }
+
+    write_file(file, idx);
     // else just write to disk
 }
 
@@ -655,7 +673,7 @@ int find_new_space(int _size)
 }
 
 
-
+// not used
 int extend_file(cfs_meta_ptr _meta, int _nsize)
 {
     int new_place = find_new_space(_nsize);
@@ -669,6 +687,7 @@ int extend_file(cfs_meta_ptr _meta, int _nsize)
     return 0;
 }
 
+// not used
 int shrink_file(cfs_meta_ptr _meta, int _nsize)
 {
     _meta->size = _nsize;
@@ -678,7 +697,7 @@ int shrink_file(cfs_meta_ptr _meta, int _nsize)
     return 0;
 }
 
-
+// not used
 int resize_file(char* _path, int _new_size)
 {
     cfs_meta_ptr file_meta_ptr = find_file_disk(_path);
@@ -700,49 +719,41 @@ int resize_file(char* _path, int _new_size)
 
 int copy_file(char* path, char* dst_path){
 
-    // find file by path in table/disk
+    printf("TODO copy_file\n");
+    return -1;
+
+    int code = 0;
+
+    // find file by path on disk
+    int file_meta_idx_disk = find_file_disk(path);
+
+    if (file_meta_idx_disk < 0){
+        printf("No file %s on disk to copy\n");
+        return -1;
+    }
+
+    // chech if destination file already exists
+    int dst_file_meta_idx_disk = find_file_disk(dst_path);
+
+     if (dst_file_meta_idx_disk > -1){
+        printf("Destination file %s already exists on disk\n");
+        return -1;
+     }
+
+    // open src file to copy
+    cfs_fopen(path);
     cfs_file_ptr file_table_ptr = find_file_table(path);
-    int* file_disk_ptr = nullptr;
-
-    // not found in table -> search on disk
-    if (file_table_ptr == nullptr){
-        file_disk_ptr = find_file_disk(path);
-    }
-
-    // not found on disk and in table
-    if (file_table_ptr == nullptr && file_disk_ptr == nullptr){
-        printf("File %s not found\n", path);
-        return -1;
-    }
-
-    // not found in table but found on disk -> open file
-    if (file_table_ptr == nullptr){
-        cfs_fopen(path);
-        file_table_ptr = find_file_table(path);
-    }
-
-    // check if file with dst_path alreay exists
-    int* file_with_dst_path = find_file_disk(dst_path);
-
-    // file already exists
-    if (file_with_dst_path != nullptr){
-        printf("File %s already exists\n", dst_path);
-        return -1;
-    }
-
-    // everything is ok
+    
     // create new file, replace data in meta and content
+
+    // get file pointer
     create_file(dst_path);
-    // resize_file
-    printf("TODO add resizing file to copy_file()\n");
     cfs_fopen(dst_path);
     cfs_file_ptr dst_f_ptr = find_file_table(dst_path);
 
-    //free content
-    free(dst_f_ptr->content);
-    // create new content, copy from first file
-    dst_f_ptr->content = malloc(file_table_ptr->meta_ptr->size);
+    // create content copy from first file
     strcpy(dst_f_ptr->content, file_table_ptr->content);
+
     // copy data to meta
     int new_start_block_idx = dst_f_ptr->meta_ptr->start_block_idx; // save to not lose
 
@@ -759,8 +770,28 @@ int copy_file(char* path, char* dst_path){
 
 int move_file(char* path, char* dst_path){
 
-    copy_file(path, dst_path);
-    delete_file(path);
+    printf("TODO move_file\n");
+    return -1;
+
+    // check if file with dst_path already exists
+    int dst_file_idx_disk = find_file_disk(dst_path);
+    if (dst_file_idx_disk > -1){
+        printf("File %s already exists\n", dst_path);
+        return -1;
+    }
+
+    // if file with path does not exist
+    int file_idx_disk = find_file_disk(path);
+    if (file_idx_disk < 0){
+        printf("File %s not found\n", path);
+        return -1;
+    }
+
+    // just replace path in file
+    cfs_fopen(path);
+    cfs_file_ptr file_ptr = find_file_table(path);
+    strcpy(file_ptr->meta_ptr->f_path, dst_path);
+    save_file(file_ptr);
 
     return 0;
 }

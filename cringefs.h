@@ -36,7 +36,6 @@ typedef struct cfs_meta_t{
 
     char f_path[CFS_FILE_PATH_LEN];
     int start_block_idx;
-    //int* start_block_ptr; 
     int size; // in bytes
     char is_dir;
     char cleared;
@@ -112,14 +111,14 @@ int exec_command(cfs_command command);
 
 int cfs_fopen(char* path); // load to table
 
-int close_file(char* path); // unload from table
+int close_file(cfs_file_ptr file); // unload from table
 
 int show_file(char* path); // show on screen
 
 // use during creation of new file to save it on disk
 int write_file(cfs_file_ptr file_ptr, int meta_idx); // save to disk // not needed 11.05.23 15:36 thinking
 
-int save_file(char* path); // save file from table to disk (if needed)
+int save_file(cfs_file_ptr file); // save file from table to disk (if needed)
 
 int extend_file(cfs_meta_ptr _meta, int _nsize); // move? file and add free blocks
 
