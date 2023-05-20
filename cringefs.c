@@ -449,10 +449,42 @@ int exec_command(cfs_command command){
 
 
 // use find_file_disk(path)
-cfs_meta_ptr find_meta_by_name(char* path)
+int find_meta_by_name(char* path)
 {
-    // if file at path not found, return nullptr
-    // else return meta_ptr
+    int* ptr;
+    char found = 0;
+    char deleted = NULL;
+    ptr = (int*)CFS_ENDPOS;
+    while (ptr >= sb.end_meta_ptr)
+    {
+        lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
+        char* name[CFS_FILE_PATH_LEN] = { NULL };
+        read(cfs_f_descriptor, &name, CFS_FILE_PATH_LEN);
+        if (compare(path, name))
+        {
+            printf("There's file %s!\n", path);
+            found = 1;
+            lseek(cfs_f_descriptor, 2 * sizeof(int) + sizeof(char), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
+            read(cfs_f_descriptor, deleted, sizeof(char));
+            if (deleted != 0)
+            {
+                printf("File %s is deleted!\n", path);
+                return NULL;
+            }
+            else 
+            {
+                lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
+                int index = disk_ptr_to_meta_idx(ptr);
+                return index;
+            }
+        }
+        ptr = (char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE);
+    }
+    if (found == 0)
+    {
+        printf("There's no file %s :(\n", path);
+        return NULL;
+    }
 }
 
 int find_meta_idx_by_path(char* path)
@@ -910,7 +942,7 @@ cfs_meta_ptr find_file_disk(char* path) {
         {
             printf("There's file %s!\n", path);
             found = 1;
-            lseek(cfs_f_descriptor, 2 * sizeof(int), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
+            lseek(cfs_f_descriptor, 2 * sizeof(int) + sizeof(char), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
             read(cfs_f_descriptor, deleted, sizeof(char));
             if (deleted != 0)
             {
