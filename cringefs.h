@@ -120,9 +120,9 @@ int write_file(cfs_file_ptr file_ptr, int meta_idx); // save to disk // not need
 
 int save_file(char* path); // save file from table to disk (if needed)
 
-int extend_file(char* path); // move? file and add free blocks
+int extend_file(cfs_meta_ptr _meta, int _nsize); // move? file and add free blocks
 
-int shrink_file(char* path); // remove blocks
+int shrink_file(cfs_meta_ptr _meta, int _nsize); // remove blocks
 
 int copy_file(char* path, char* dst_path); // copy file from path to dst_path
 
