@@ -513,53 +513,13 @@ int* meta_idx_to_disc_ptr(int idx){
 
 
 
-// if file already opened return code = -1, if successfully opened 0
+// if file already opened return code = 1, if file not found on disk return code -1,
+// if successfully opened return code 0
 int cfs_fopen(char* path) {
-
-
-    /* if (find_file_table(path) != nullptr) // already opened
-    {
-        return 0;
-    }
-    
-                            // replace with find_file_disk(path)
-    cfs_meta_ptr meta_ptr = find_meta_by_name(path);
-
-    if (meta_ptr == nullptr) // not found on disc
-    {
-        return -1;
-    }
-    else
-    {
-
-        int* to_disc_ptr = block_idx_to_disc_ptr(meta_ptr->start_block_idx);
-
-        if (to_disc_ptr == nullptr)
-        {
-            return -1; // error
-        }
-
-        int file_size = meta_ptr->size;
-
-        char* buf = calloc(file_size, sizeof(char));
-        if (buf == nullptr)
-        {
-            return -1; // error
-        }
-
-        printf("TODO: decomment read in cfs_open");
-        //read(to_disc_ptr, buf, )
-
-    }
- */
-    // if file already in table return 0
-    // read file paths from disk until you find path
-    // if path not found return -1
-    // read file, add file to table
 
     // if file was already opened
     if (find_file_table(path) != NULL) {
-        return 0;
+        return 1;
     }
 
     // if file not found on disk
