@@ -81,6 +81,7 @@ int startup(char* device_path){
     }
     else {
         printf("Everything is OK\n");
+        init_file_table();
         return 1;
     }
     // if something bad return -1
@@ -91,6 +92,7 @@ int shutdown(){
         printf("Oh no, something very bad happened :(\n");
         return -1;
     }
+    destroy_table();
     return 0;
     // if something bad return -1
 }
