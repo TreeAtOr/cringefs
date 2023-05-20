@@ -438,6 +438,7 @@ int exec_command(cfs_command command){
         break;
     case DEBUG:
         // insert your functions here. Don`t forget to delete after use
+        debug_print_files_meta_on_disk();
         break;
     case EXIT:
         return 0;
@@ -453,7 +454,7 @@ int find_meta_by_name(char* path)
 {
     int* ptr;
     char found = 0;
-    char deleted = NULL;
+    char deleted = 0;
     ptr = (int*)CFS_ENDPOS;
     while (ptr >= sb.end_meta_ptr)
     {
@@ -465,11 +466,11 @@ int find_meta_by_name(char* path)
             printf("There's file %s!\n", path);
             found = 1;
             lseek(cfs_f_descriptor, 2 * sizeof(int) + sizeof(char), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
-            read(cfs_f_descriptor, deleted, sizeof(char));
+            read(cfs_f_descriptor, &deleted, sizeof(char));
             if (deleted != 0)
             {
                 printf("File %s is deleted!\n", path);
-                return NULL;
+                return -1;
             }
             else 
             {
@@ -483,7 +484,7 @@ int find_meta_by_name(char* path)
     if (found == 0)
     {
         printf("There's no file %s :(\n", path);
-        return NULL;
+        return -1;
     }
 }
 
@@ -842,7 +843,7 @@ int create_file(char* path){
         meta.cleared = 0;
         // temporary content
         char content[CFS_ONE_BLOCK_SIZE];
-        char create_msg[] = "File recently created\n";
+        char create_msg[] = "File recently created\0";
         strcpy(content, create_msg);
         // remember that this file deletes after exiting function
         cfs_file new_file;
@@ -860,7 +861,7 @@ int create_file(char* path){
         // subdivide meta
     }
 
-    debug_print_files_meta_on_disk();
+    //debug_print_files_meta_on_disk();
    
     return 0;
 }
