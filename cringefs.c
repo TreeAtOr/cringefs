@@ -410,7 +410,10 @@ int exec_command(cfs_command command){
         break;
     case CLOSE:
         // close file with path <arg1>
-        close_file(command.arg1);
+        cfs_file_ptr ptr = find_file_table(command.arg1);
+        if (ptr == nullptr)
+            return -1;
+        close_file(ptr);
         break;
     case SHOW:
         // show file with path <arg1>
@@ -459,8 +462,8 @@ int find_meta_by_name(char* path)
     while (ptr >= sb.end_meta_ptr)
     {
         lseek(cfs_f_descriptor, (uintptr_t)ptr - CFS_ONE_META_SIZE, SEEK_SET);
-        char* name[CFS_FILE_PATH_LEN] = { NULL };
-        read(cfs_f_descriptor, &name, CFS_FILE_PATH_LEN);
+        char name[CFS_FILE_PATH_LEN];
+        read(cfs_f_descriptor, name, CFS_FILE_PATH_LEN);
         if (compare(path, name))
         {
             printf("There's file %s!\n", path);
@@ -479,7 +482,7 @@ int find_meta_by_name(char* path)
                 return index;
             }
         }
-        ptr = (char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE);
+        ptr = (int*)((char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE));
     }
     if (found == 0)
     {
@@ -505,13 +508,13 @@ int* block_idx_to_disc_ptr(int idx)
     }
 
     int* result = 0;
-    result = (int*)(idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS); // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
-
+    result = (int*)(long)(idx * CFS_ONE_BLOCK_SIZE + CFS_SUPERBLOCK_SIZE + CFS_STARTPOS); // + sizeof(cfs_super_block) ? + смещение суперлока на диске(CFS_STARTPOS)
+    
     // check border ptrs
-    if (result < sb.start_block_ptr - CFS_SUPERBLOCK_SIZE || result > sb.start_meta_ptr + CFS_ONE_META_SIZE){
-        printf("Converted block idx %i -> %i out of borders\n", idx, result);
-        return nullptr;
-    }
+    // if (result < sb.start_block_ptr - CFS_SUPERBLOCK_SIZE || result > sb.start_meta_ptr + CFS_ONE_META_SIZE){
+    //     printf("Converted block idx %i -> %i out of borders\n", idx, result);
+    //     return nullptr;
+    // }
 
     return result;
 }
@@ -519,7 +522,7 @@ int* block_idx_to_disc_ptr(int idx)
 int disk_ptr_to_block_idx(int* ptr){
 
     int result = -1;
-    int intptr = (int)ptr;
+    int intptr = (uintptr_t)ptr;
 
     result = (intptr - CFS_STARTPOS - CFS_SUPERBLOCK_SIZE) / CFS_ONE_BLOCK_SIZE;
 
@@ -529,7 +532,7 @@ int disk_ptr_to_block_idx(int* ptr){
 int disk_ptr_to_meta_idx(int* ptr){
 
     int result = -1;
-    int intptr = (int)ptr;
+    int intptr = (uintptr_t)ptr;
 
     result = (CFS_ENDPOS - CFS_ONE_META_SIZE - intptr);
     result =  result / CFS_ONE_META_SIZE;
@@ -541,7 +544,7 @@ int* meta_idx_to_disc_ptr(int idx){
 
     int* result = nullptr;
 
-    result = (int*)(CFS_ENDPOS - CFS_ONE_META_SIZE - CFS_ONE_META_SIZE * idx);
+    result = (int*)(long)(CFS_ENDPOS - CFS_ONE_META_SIZE - CFS_ONE_META_SIZE * idx);
 
     return result;
 }
@@ -583,7 +586,7 @@ int close_file(cfs_file_ptr file){
 
     code = save_file(file);
     if (code < 0){
-        printf("Can not close file %s\n");
+        printf("Can not close file %s\n", file->meta_ptr->f_path);
         return -1;
     }
     remove_from_table(file->meta_ptr->f_path);
@@ -643,25 +646,25 @@ int find_new_space(int _size)
 // not used
 int extend_file(cfs_meta_ptr _meta, int _nsize)
 {
-    int new_place = find_new_space(_nsize);
+    //int new_place = find_new_space(_nsize);
     // move file data to new place
     // todo
 
-    _meta->size = _nsize;
-    _meta->start_block_idx = new_place;
-    write_meta(find_meta_idx_by_path(_meta->f_path), _meta);
+    //_meta->size = _nsize;
+    //_meta->start_block_idx = new_place;
+    //write_meta(find_meta_idx_by_path(_meta->f_path), _meta);
 
-    return 0;
+    return -1;
 }
 
 // not used
 int shrink_file(cfs_meta_ptr _meta, int _nsize)
 {
-    _meta->size = _nsize;
+    //_meta->size = _nsize;
 
-    write_meta(find_meta_idx_by_path(_meta->f_path), _meta);
+    //write_meta(find_meta_idx_by_path(_meta->f_path), _meta);
 
-    return 0;
+    return -1;
 }
 
 // not used
@@ -692,18 +695,18 @@ int copy_file(char* path, char* dst_path){
     int code = 0;
 
     // find file by path on disk
-    int file_meta_idx_disk = find_file_disk(path);
+    int file_meta_idx_disk = find_meta_by_name(path);
 
     if (file_meta_idx_disk < 0){
-        printf("No file %s on disk to copy\n");
+        printf("No file %s on disk to copy\n", path);
         return -1;
     }
 
     // chech if destination file already exists
-    int dst_file_meta_idx_disk = find_file_disk(dst_path);
+    int dst_file_meta_idx_disk = find_meta_by_name(dst_path);
 
      if (dst_file_meta_idx_disk > -1){
-        printf("Destination file %s already exists on disk\n");
+        printf("Destination file %s already exists on disk\n", dst_path);
         return -1;
      }
 
@@ -729,7 +732,7 @@ int copy_file(char* path, char* dst_path){
     dst_f_ptr->meta_ptr->start_block_idx = new_start_block_idx; // recover new adress
 
     // save new file
-    save_file(dst_f_ptr->meta_ptr->f_path);
+    save_file(dst_f_ptr);
 
     return 0;
 
@@ -741,14 +744,14 @@ int move_file(char* path, char* dst_path){
     return -1;
 
     // check if file with dst_path already exists
-    int dst_file_idx_disk = find_file_disk(dst_path);
+    int dst_file_idx_disk = find_meta_by_name(dst_path);
     if (dst_file_idx_disk > -1){
         printf("File %s already exists\n", dst_path);
         return -1;
     }
 
     // if file with path does not exist
-    int file_idx_disk = find_file_disk(path);
+    int file_idx_disk = find_meta_by_name(path);
     if (file_idx_disk < 0){
         printf("File %s not found\n", path);
         return -1;
@@ -784,7 +787,7 @@ int delete_file(char* path){
     // if found set file cleared
     file_table_ptr->meta_ptr->cleared = 1;
     // close file(with save)
-    close_file(path);
+    close_file(file_table_ptr);
 
     return 0;
 
@@ -847,7 +850,7 @@ int create_file(char* path){
 
         write_file(&new_file, meta_idx);
         
-        sb.end_meta_ptr = (char*)sb.end_meta_ptr - (uintptr_t)CFS_ONE_META_SIZE;
+        sb.end_meta_ptr = (int *)((char*)sb.end_meta_ptr - (uintptr_t)CFS_ONE_META_SIZE);
         //sb.free_space_ptr = sb.free_space_ptr + (uintptr_t)CFS_ONE_BLOCK_SIZE;
     }
     if (ret_code == 1){
@@ -870,7 +873,7 @@ int sort_meta(){
 // return -1 if no space, 0 if meta from the end, 1 if of deleted file
 int get_free_meta(int minimum_blocks_num, int* dst_meta_idx){
     // test code; return free space after all meta
-    *dst_meta_idx = disk_ptr_to_meta_idx((int)(sb.end_meta_ptr)) + 1;
+    *dst_meta_idx = disk_ptr_to_meta_idx(sb.end_meta_ptr) + 1;
     return 0;
 }
 
@@ -904,19 +907,19 @@ cfs_meta_ptr find_file_disk(char* path) {
     // find on disk
     int* ptr;
     char found = 0;
-    char deleted = NULL;
+    char deleted = 0;
     ptr = (int*)(CFS_ENDPOS - CFS_ONE_META_SIZE);
     while (ptr >= sb.end_meta_ptr)
     {
         lseek(cfs_f_descriptor, (uintptr_t)ptr, SEEK_SET);
-        char* name[CFS_FILE_PATH_LEN] = { NULL };
-        read(cfs_f_descriptor, &name, CFS_FILE_PATH_LEN);
+        char name[CFS_FILE_PATH_LEN];
+        read(cfs_f_descriptor, name, CFS_FILE_PATH_LEN);
         if (compare(path, name))
         {
             printf("There's file %s!\n", path);
             found = 1;
             lseek(cfs_f_descriptor, 2 * sizeof(int) + sizeof(char), SEEK_CUR); // we was already on [START_OF_META] + [SIZE_OF_NAME], so we just add to this position 2 * sizeof(int) bytes and we can read CLEAR flag
-            read(cfs_f_descriptor, deleted, sizeof(char));
+            read(cfs_f_descriptor, &deleted, sizeof(char));
             if (deleted != 0)
             {
                 printf("File %s is deleted!\n", path);
@@ -930,7 +933,7 @@ cfs_meta_ptr find_file_disk(char* path) {
                 return meta_for_file;
             }
         }
-        ptr = (char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE);
+        ptr = (int*)((char*)ptr - (uintptr_t)(CFS_ONE_META_SIZE));
     }
     if (found == 0)
     {
@@ -952,7 +955,7 @@ int get_new_free_block_idx(){
 
     // everything is ok
     //sb.free_space_ptr += CFS_ONE_BLOCK_SIZE;
-    sb.free_space_ptr = (char*)sb.free_space_ptr + CFS_ONE_BLOCK_SIZE;
+    sb.free_space_ptr = (int *)((char*)sb.free_space_ptr + CFS_ONE_BLOCK_SIZE);
     return new_block_idx;
 
 }
@@ -1073,7 +1076,7 @@ void shift_array_of_files(int start_index) {
 }
 
 void debug_print_files_meta_on_disk(){
-    int* meta_ptr = CFS_ENDPOS - CFS_ONE_META_SIZE;
+    int* meta_ptr = (int *)(CFS_ENDPOS - CFS_ONE_META_SIZE);
 
     cfs_meta buffer_meta;
     int file_counter = 0;
@@ -1081,7 +1084,7 @@ void debug_print_files_meta_on_disk(){
         read_meta(meta_ptr, &buffer_meta);
         printf("File %2i with name: %s\n", file_counter, buffer_meta.f_path);
         file_counter++;
-        meta_ptr = (char*)meta_ptr - (uintptr_t)CFS_ONE_META_SIZE;
+        meta_ptr = (int*)((char*)meta_ptr - (uintptr_t)CFS_ONE_META_SIZE);
     }
 }
 

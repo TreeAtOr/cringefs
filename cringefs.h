@@ -145,6 +145,7 @@ int pack_fs();
 // requesting <minimum_blocks_num> blocks
 // if not found return nullptr
 int find_empty_space_in_meta(int minimum_blocks_num);
+int get_free_meta(int minimum_blocks_num, int* dst_meta_idx);
 
 int format_fs();
 
@@ -193,6 +194,8 @@ void read_meta(int* disk_meta_ptr, cfs_meta_ptr dst_meta);
 
 // write meta to disk starting from disk_meta_ptr address
 void write_meta(int* disk_meta_ptr, cfs_meta_ptr meta);
+
+
 
 
 void debug_print(char* str);
