@@ -620,6 +620,7 @@ int write_file(cfs_file_ptr file_ptr, int meta_idx){
     return 0;
 }
 
+// save file from table to disk. File must exist in table and on disk
 int save_file(cfs_file_ptr file){
 
 
@@ -634,12 +635,14 @@ int save_file(cfs_file_ptr file){
     // else just write to disk
 }
 
+// not used
 int find_new_space(int _size)
 {
-    int new_start_idx = 0;
+    //int new_start_idx = 0;
     // for all metas? check size?
     // todo
-    return new_start_idx;
+    // return new_start_idx;
+    return -1;
 }
 
 
@@ -688,9 +691,6 @@ int resize_file(char* _path, int _new_size)
 
 
 int copy_file(char* path, char* dst_path){
-
-    printf("TODO copy_file\n");
-    return -1;
 
     int code = 0;
 
