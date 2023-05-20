@@ -200,4 +200,6 @@ void debug_print(char* str);
 // show all names of files on disk
 void debug_print_files_meta_on_disk();
 
+int add_text_to_file();
+
 
