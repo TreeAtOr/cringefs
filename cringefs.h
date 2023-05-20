@@ -64,21 +64,21 @@ typedef struct cfs_file_table_t{
     size_t count_opened_files;
 } cfs_file_table;
 
-
+//                                                  Комментарии для Глеба
 typedef enum cfs_command_type_t{
-    OPEN,     // open  /text.txt
-    CLOSE,    // close /text.txt
-    SHOW,     // cat   /text.txt
-    DELETE,   // rm    /text.txt
-    CREATE,   // touch /text.txt
-    COPY,     // cp    /text.txt /text2.txt
-    MOVE,     // mv    /text.txt /dir/text.txt
-    CREATEDIR,// mkdir /dir
-    FORMAT,   // format
-    EXTEND,   // command is needed or it is inner function?
-    SHRINK,   // command is needed or it is inner function?
-    EXIT,     // exit
-    DEBUG
+    OPEN,     // open  /text.txt                    Открывает файл, лежащий на диске, по его пути
+    CLOSE,    // close /text.txt                    Закрывает файл из таблицы файлов по его пути
+    SHOW,     // cat   /text.txt                    Выводит файл на экран по его пути
+    DELETE,   // rm    /text.txt                    Удаляет файл с диска по его пути
+    CREATE,   // touch /text.txt                    Создаёт новый файл по его пути
+    COPY,     // cp    /text.txt /text2.txt         Копирует файл по первому пути в файл по вророму пути
+    MOVE,     // mv    /text.txt /dir/text.txt      Перемещает файл по первому пути в файл по второму пути(переименовывает)
+    CREATEDIR,// mkdir /dir                         Создаёт директорию(не используется)
+    FORMAT,   // format                             Форматирует файловую систему
+    EXTEND,   // not used
+    SHRINK,   // not used
+    EXIT,     // exit                               Выход из программы взаимодействия с файловой системой
+    DEBUG     //                                    Вывод на экран отладочных сведений
     // etc.
 } cfs_command_type;
 
@@ -147,6 +147,7 @@ int pack_fs();
 // requesting <minimum_blocks_num> blocks
 // if not found return nullptr
 int find_empty_space_in_meta(int minimum_blocks_num);
+int get_free_meta(int minimum_blocks_num, int* dst_meta_idx);
 
 int format_fs();
 
@@ -197,9 +198,17 @@ void read_meta(int* disk_meta_ptr, cfs_meta_ptr dst_meta);
 void write_meta(int* disk_meta_ptr, cfs_meta_ptr meta);
 
 
+
+
 void debug_print(char* str);
 
 // show all names of files on disk
 void debug_print_files_meta_on_disk();
+
+void debug_print_sb();
+
+int add_text_to_file();
+
+
 
 
