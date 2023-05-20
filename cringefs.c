@@ -548,23 +548,24 @@ int* meta_idx_to_disc_ptr(int idx){
 
 
 
-// if file already opened return code = 1, if file not found on disk return code -1,
-// if successfully opened return code 0
-int cfs_fopen(char* path) {
+// if file already opened or successfully opened return file pointer
+// if file not found on disk return NULL
+cfs_file_ptr cfs_fopen(char* path) {
 
     // if file was already opened
-    if (find_file_table(path) != NULL) {
-        return 1;
+    cfs_file_ptr file_for_open = find_file_table(path);
+    if (file_for_open != NULL) {
+        printf("Returning file from table\n");
+        return file_for_open;
     }
-
     // if file not found on disk
     cfs_meta_ptr pointer_on_meta = find_file_disk(path);
     if (pointer_on_meta == NULL) {
-        printf("Error in cfs_fopen because file not found!\n");
-        return -1;
+        printf("Error in cfs_fopen because file not found on disk!\n");
+        return NULL;
     }
 
-    cfs_file_ptr file_for_open = (cfs_file_ptr)malloc(sizeof(cfs_file));
+    file_for_open = (cfs_file_ptr)malloc(sizeof(cfs_file));
     file_for_open->content = malloc(pointer_on_meta->size);
     file_for_open->meta_ptr = pointer_on_meta;
 
@@ -572,7 +573,7 @@ int cfs_fopen(char* path) {
     read(cfs_f_descriptor, file_for_open->content, pointer_on_meta->size);
     add_to_table(file_for_open);
     printf("opening completed\n");
-    return 0;
+    return file_for_open;
 }
 
 // file must exist in file table
@@ -592,15 +593,11 @@ int close_file(cfs_file_ptr file){
 // if file not opened return code -1, if file was successfully opened return code 0
 int show_file(char* path) {
     
-    int ret_code = cfs_fopen(path);
-    if (ret_code == -1) {
-        return -1;
-    } 
-
-    cfs_file_ptr file_to_read = find_file_table(path);
+    cfs_file_ptr searched_file = cfs_fopen(path);
+    if (searched_file == NULL) return -1;
 
     printf("File is open!\n");
-    if (file_to_read->meta_ptr->size != 0) printf("%s\n", file_to_read->content);
+    if (searched_file->meta_ptr->size != 0) printf("%s\n", searched_file->content);
     else printf("File is empty!\n");
 
     return 0;
@@ -1016,7 +1013,7 @@ int add_to_table(cfs_file_ptr file) {
     ft.files[ft.count_opened_files] = file;
     printf("file was added to table with name: %s\n", ft.files[ft.count_opened_files]->meta_ptr->f_path);
     ft.count_opened_files++;
-    printf("crurent count of opened files: %li\n", ft.count_opened_files);
+    printf("current count of opened files: %li\n", ft.count_opened_files);
     return 1;
 }
 
