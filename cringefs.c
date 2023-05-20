@@ -565,7 +565,7 @@ int cfs_fopen(char* path) {
 
     cfs_file_ptr file_for_open = (cfs_file_ptr)malloc(sizeof(cfs_file));
     file_for_open->content = malloc(pointer_on_meta->size);
-    file_for_open->meta_ptr = (cfs_meta_ptr)malloc(sizeof(cfs_meta));
+    file_for_open->meta_ptr = pointer_on_meta;
 
     lseek(cfs_f_descriptor, (long)block_idx_to_disc_ptr(pointer_on_meta->start_block_idx), SEEK_SET);
     read(cfs_f_descriptor, file_for_open->content, pointer_on_meta->size);
@@ -588,48 +588,22 @@ int close_file(cfs_file_ptr file){
     return 0;
 }
 
+// if file not opened return code -1, if file was successfully opened return code 0
 int show_file(char* path) {
+    
+    int ret_code = cfs_fopen(path);
+    if (ret_code == -1) {
+        return -1;
+    } 
 
-    // find file with path in table
-    // show on screen
-    // if not found
-    // find file on disk
-    // show on screen
-    // if not foud
-    // print no such file
-    printf("before first\n");
     cfs_file_ptr file_to_read = find_file_table(path);
-    printf("after first find\n");
-    while(1)
-    {
-        if (file_to_read != NULL)
-        {
-            printf("File is open!\n");
-            if (file_to_read->meta_ptr->size != 0)
-            {
-                printf("%c\n", file_to_read->content);
-                break;
-            }
-            else
-            {
-                printf("File is empty!\n");
-                return -1;
-            }
-        }
-        else 
-        {
-            if (cfs_fopen(path) == -1)
-                return -1;
-            else
-            {
-                printf("Opening of file...\n");
-                file_to_read = find_file_table(path);
-                printf("after second find\n");
-                printf("file is opened\n");
-            }
-        }
-    }
-    return 1;
+
+    printf("File is open!\n");
+    if (file_to_read->meta_ptr->size != 0) printf("%s\n", file_to_read->content);
+    else printf("File is empty!\n");
+
+    return 0;
+    
 }
 
 
@@ -1039,7 +1013,9 @@ int add_to_table(cfs_file_ptr file) {
         exit(1);
     }
     ft.files[ft.count_opened_files] = file;
+    printf("file was added to table with name: %s\n", ft.files[ft.count_opened_files]->meta_ptr->f_path);
     ft.count_opened_files++;
+    printf("crurent count of opened files: %li\n", ft.count_opened_files);
     return 1;
 }
 
@@ -1075,7 +1051,7 @@ int clear_table() {
 // return file ptr if found file else NULL
 cfs_file_ptr find_file_table(char* path) {
     for (int i = 0; i < ft.count_opened_files; ++i) {
-        if (strcmp(ft.files[i]->meta_ptr->f_path, "kek") == 0) {
+        if (strcmp(ft.files[i]->meta_ptr->f_path, path) == 0) {
             return ft.files[i];
         } 
     }
